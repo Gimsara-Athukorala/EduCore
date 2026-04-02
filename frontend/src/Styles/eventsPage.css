@@ -1,0 +1,133 @@
+/* Events Page Styles */
+.events-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.page-header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1E3A8A;
+  margin: 0 0 10px 0;
+}
+
+.page-header p {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.events-nav {
+  max-width: 1400px;
+  margin: 0 auto 30px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.events-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #FFFFFF;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.events-tab:hover {
+  border-color: #3B82F6;
+  color: #3B82F6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.events-tab.active {
+  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+
+.events-tab svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.events-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .events-page {
+    padding: 20px 15px;
+  }
+
+  .page-header {
+    margin-bottom: 30px;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+  }
+
+  .events-nav {
+    gap: 10px;
+  }
+
+  .events-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .events-tab svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .events-nav {
+    flex-direction: column;
+  }
+
+  .events-tab {
+    width: 100%;
+    justify-content: center;
+  }
+}
