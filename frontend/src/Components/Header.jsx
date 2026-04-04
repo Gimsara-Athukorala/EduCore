@@ -9,15 +9,15 @@ function Header({ setCurrentPage }) {
   return (
     <header className="sticky top-0 z-100 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
       <div className="max-w-7xl mx-auto px-5">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24">
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center justify-center w-10 h-10 bg-white/15 rounded-lg flex-shrink-0">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="4" width="24" height="24" rx="2" stroke="#FFFFFF" strokeWidth="2"/>
-                <path d="M10 14L14 18L22 10" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            <img
+              src="/assets/EduCore_Logo.png"
+              alt="EduCore Logo"
+              className="w-24 h-24 object-contain flex-shrink-0"
+              style={{ border: '2px solid rgba(255,255,255,0.8)' }}
+            />
             <div className="flex flex-col gap-0">
               <h1 className="text-xl font-bold text-white leading-tight">EduCore</h1>
               <p className="text-xs font-medium opacity-85 uppercase tracking-wide">Learning Event Management</p>
