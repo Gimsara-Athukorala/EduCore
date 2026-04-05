@@ -1,13 +1,29 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from '../Context/AuthContext';
 
-function Header({ setCurrentPage }) {
+function Header({ setCurrentPage, isAuthenticated, user, onLogout }) {
+  const { isAdmin } = useContext(AuthContext);
+
   const handleEventClick = () => {
-    setCurrentPage('events');
+    if (isAuthenticated && isAdmin) {
+      setCurrentPage('events'); // Admin events page
+    } else {
+      setCurrentPage('events'); // Regular events page
+    }
+    window.scrollTo(0, 0);
+  };
+
+  const handleHomeClick = () => {
+    if (isAuthenticated && isAdmin) {
+      setCurrentPage('dashboard'); // Admin dashboard
+    } else {
+      setCurrentPage('home'); // Regular home
+    }
     window.scrollTo(0, 0);
   };
 
   return (
-    <header className="sticky top-0 z-100 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
       <div className="max-w-7xl mx-auto px-5">
         <div className="flex justify-between items-center h-24">
           {/* Brand */}
@@ -15,8 +31,7 @@ function Header({ setCurrentPage }) {
             <img
               src="/assets/EduCore_Logo.png"
               alt="EduCore Logo"
-              className="w-24 h-24 object-contain flex-shrink-0"
-              style={{ border: '2px solid rgba(255,255,255,0.8)' }}
+              className="w-40 h-40 object-contain flex-shrink-0"
             />
             <div className="flex flex-col gap-0">
               <h1 className="text-xl font-bold text-white leading-tight">EduCore</h1>
@@ -26,26 +41,40 @@ function Header({ setCurrentPage }) {
 
           {/* Navigation */}
           <nav className="flex gap-8 items-center flex-1 ml-10 hidden lg:flex">
-            <button onClick={() => { setCurrentPage('home'); window.scrollTo(0, 0); }} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</button>
+            <button onClick={handleHomeClick} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</button>
             <button onClick={handleEventClick} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Events</button>
             <a href="#about" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">About</a>
             <a href="#help" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Help</a>
           </nav>
 
           {/* Actions */}
-          <div className="flex gap-3 items-center ml-auto">
-            <button className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="Search">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M12 12L17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-            <button className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="User Profile">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M3 17C3 13.5 6.2 11 10 11C13.8 11 17 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
+          <div className="flex items-center gap-2 ml-auto text-sm text-white">
+            {user ? (
+              <>
+                <span className="px-3 py-2 bg-white/15 rounded-lg">{user.name} ({user.role})</span>
+                <button
+                  onClick={() => onLogout()}
+                  className="px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setCurrentPage('login')}
+                  className="px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setCurrentPage('register')}
+                  className="px-3 py-2 bg-white/20 rounded-lg hover:bg-white/30"
+                >
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import { 
   format, 
   startOfMonth, 
@@ -81,35 +81,58 @@ const EventCalendar = ({ refreshTrigger, onSelectEvent }) => {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-600">Loading calendar...</div>;
+    return (
+      <div className="w-full max-w-6xl mx-auto px-5 flex justify-center items-center py-16">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-300 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading calendar...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-primary-600">Event Calendar</h2>
-        <div className="flex gap-2">
-          <button className="px-3 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-all font-medium" onClick={previousMonth}>Previous</button>
-          <button className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all font-medium" onClick={goToToday}>Today</button>
-          <button className="px-3 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-all font-medium" onClick={nextMonth}>Next</button>
+    <div className="w-full max-w-6xl mx-auto px-5">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <h2 className="text-3xl font-bold text-primary-600">Event Calendar</h2>
+        <div className="flex flex-wrap gap-3">
+          <button 
+            className="px-4 py-2 border-2 border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-all font-semibold text-sm" 
+            onClick={previousMonth}
+          >
+            ← Previous
+          </button>
+          <button 
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all font-semibold text-sm shadow-md" 
+            onClick={goToToday}
+          >
+            Today
+          </button>
+          <button 
+            className="px-4 py-2 border-2 border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-all font-semibold text-sm" 
+            onClick={nextMonth}
+          >
+            Next →
+          </button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          {error}
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg shadow-sm">
+          <p className="font-semibold mb-1">Error</p>
+          <p className="text-sm">{error}</p>
         </div>
       )}
 
-      <div className="mb-4 p-4 bg-light border border-border rounded-lg">
-        <h3 className="text-lg font-bold text-primary-600">{format(currentDate, 'MMMM yyyy')}</h3>
+      <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+        <h3 className="text-2xl font-bold text-primary-600">{format(currentDate, 'MMMM yyyy')}</h3>
       </div>
 
-      <div className="mb-6 bg-white border border-border rounded-lg overflow-hidden shadow-md">
-        <div className="grid grid-cols-7 gap-0 border-b border-border bg-primary-600">
+      <div className="mb-6 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg">
+        <div className="grid grid-cols-7 gap-0 border-b border-gray-200 bg-gradient-to-r from-primary-600 to-primary-700">
           {/* Week day headers */}
           {weekDays.map(day => (
-            <div key={day} className="p-3 text-white text-center font-semibold text-sm border-r border-primary-500 last:border-r-0">
+            <div key={day} className="p-4 text-white text-center font-bold text-sm">
               {day}
             </div>
           ))}
@@ -126,18 +149,18 @@ const EventCalendar = ({ refreshTrigger, onSelectEvent }) => {
             return (
               <div
                 key={index}
-                className={`min-h-24 p-2 border border-border ${ 
+                className={`min-h-28 p-3 border border-gray-200 transition-all ${ 
                   !isCurrentMonth ? 'bg-gray-50' : 'bg-white'
-                } ${isToday ? 'bg-yellow-50 border-2 border-yellow-400' : ''}`}
+                } ${isToday ? 'bg-yellow-50 border-2 border-yellow-400 shadow-inner' : ''} hover:bg-blue-50`}
               >
-                <div className={`text-sm font-bold mb-1 ${isToday ? 'text-yellow-700' : 'text-gray-700'}`}>
+                <div className={`text-sm font-bold mb-2 ${isToday ? 'text-yellow-700 bg-yellow-100 px-2 py-1 rounded inline-block' : 'text-gray-700'}`}>
                   {format(day, 'd')}
                 </div>
                 <div className="space-y-1">
                   {dayEvents.map(event => (
                     <div
                       key={event._id}
-                      className={`px-2 py-1 rounded text-xs font-medium cursor-pointer border truncate transition-all hover:shadow-md ${getEventColor(event.category)}`}
+                      className={`px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer border truncate transition-all hover:shadow-md hover:scale-105 transform ${getEventColor(event.category)}`}
                       onClick={() => onSelectEvent && onSelectEvent(event._id)}
                       title={event.title}
                     >
@@ -151,32 +174,35 @@ const EventCalendar = ({ refreshTrigger, onSelectEvent }) => {
         </div>
       </div>
 
-      <div className="bg-light border border-border rounded-lg p-4">
-        <h4 className="font-bold text-primary-600 mb-4">Categories</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-300 rounded border border-blue-500"></div>
-            <span className="text-sm text-gray-700">Competition</span>
+      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg">
+        <h4 className="font-bold text-lg text-primary-600 mb-6 flex items-center gap-2">
+          <span className="w-1 h-6 bg-primary-600 rounded-full"></span>
+          Event Categories
+        </h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-blue-300 rounded border-2 border-blue-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Competition</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-300 rounded border border-green-500"></div>
-            <span className="text-sm text-gray-700">Workshop</span>
+          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-green-300 rounded border-2 border-green-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Workshop</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-purple-300 rounded border border-purple-500"></div>
-            <span className="text-sm text-gray-700">Musical Event</span>
+          <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-purple-300 rounded border-2 border-purple-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Musical Event</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-300 rounded border border-red-500"></div>
-            <span className="text-sm text-gray-700">Religious Event</span>
+          <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-red-300 rounded border-2 border-red-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Religious Event</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-amber-300 rounded border border-amber-500"></div>
-            <span className="text-sm text-gray-700">Academic Event</span>
+          <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-amber-300 rounded border-2 border-amber-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Academic Event</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-300 rounded border border-gray-500"></div>
-            <span className="text-sm text-gray-700">Other</span>
+          <div className="flex items-center gap-3 p-3 bg-gray-100 rounded-lg border border-gray-300 hover:shadow-md transition-all">
+            <div className="w-5 h-5 bg-gray-300 rounded border-2 border-gray-500 flex-shrink-0"></div>
+            <span className="text-sm font-medium text-gray-700">Other</span>
           </div>
         </div>
       </div>

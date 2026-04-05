@@ -78,16 +78,21 @@ function ContactUsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="bg-gradient-to-r from-primary-600 to-secondary px-5 py-12 text-white">
-        <h1 className="text-4xl font-bold mb-3">Get In Touch</h1>
-        <p className="text-lg text-gray-100">We're here to help. Send us a message and we'll respond as soon as possible.</p>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-primary-600 to-secondary px-4 py-12 text-white">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold mb-3">Get In Touch</h1>
+          <p className="text-lg text-primary-100">We're here to help. Send us a message and we'll respond as soon as possible.</p>
+        </div>
       </div>
 
-      <div className="flex-grow max-w-7xl mx-auto w-full px-5 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Contact Info Cards */}
-          <div className="space-y-6">
+      {/* Main Content */}
+      <div className="flex-grow px-4 py-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Contact Info Cards */}
+            <div className="space-y-6">
             <div className="border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-primary-100 text-primary-600 rounded-lg">
@@ -233,6 +238,7 @@ function ContactUsPage() {
               </div>
             )}
           </form>
+        </div>
         </div>
       </div>
     </div>

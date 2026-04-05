@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const Event = require('./Model/eventModel');
+const User = require('./Model/userModel');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lms';
 
@@ -13,7 +14,7 @@ const testEvents = [
     endDate: new Date('2024-03-25T12:00:00'),
     location: 'Room 101, Building A',
     organizer: 'Dr. Sarah Johnson',
-    category: 'lecture',
+    category: 'academicEvent',
     attendees: ['John Doe', 'Jane Smith', 'Bob Wilson'],
     status: 'scheduled'
   },
@@ -56,6 +57,24 @@ const seedDatabase = async () => {
       console.log(`   Attendees: ${event.attendees.join(', ')}`);
       console.log(`   ID: ${event._id}\n`);
     });
+
+    // Ensure first admin exists by seed
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234!';
+    const adminName = process.env.ADMIN_NAME || 'Admin';
+
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (!adminExists) {
+      const admin = await User.create({
+        name: adminName,
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+      });
+      console.log(`\n✅ Initial admin created (email=${adminEmail}, password=${adminPassword})`);
+    } else {
+      console.log('\nℹ️ Admin user already exists, no admin seed needed.');
+    }
 
     process.exit(0);
   } catch (error) {

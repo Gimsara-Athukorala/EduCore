@@ -31,7 +31,10 @@ app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Also increase URL-encoded limit
 
 // Routes
+const authRoutes = require('./Routes/authRoutes');
 const eventRoutes = require('./Routes/eventRoutes');
+
+app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 
 // Root endpoint

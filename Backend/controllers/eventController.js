@@ -134,6 +134,71 @@ exports.deleteEvent = async (req, res) => {
   }
 };
 
+// Enroll user in event
+exports.enrollUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id; // From auth middleware
+    const userName = req.user.name; // From auth middleware
+
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    // Check if user is already enrolled
+    if (event.attendees.includes(userName)) {
+      return res.status(400).json({ message: 'User already enrolled in this event' });
+    }
+
+    // Add user to attendees
+    event.attendees.push(userName);
+    await event.save();
+
+    res.status(200).json({
+      message: 'Successfully enrolled in event',
+      event
+    });
+  } catch (error) {
+    console.error('Enroll error:', error);
+    res.status(500).json({ message: 'Error enrolling in event', error: error.message });
+  }
+};
+
+// Unenroll user from event
+exports.unenrollUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userName = req.user.name;
+
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    // Check if user is enrolled
+    const attendeeIndex = event.attendees.indexOf(userName);
+    if (attendeeIndex === -1) {
+      return res.status(400).json({ message: 'User not enrolled in this event' });
+    }
+
+    // Remove user from attendees
+    event.attendees.splice(attendeeIndex, 1);
+    await event.save();
+
+    res.status(200).json({
+      message: 'Successfully unenrolled from event',
+      event
+    });
+  } catch (error) {
+    console.error('Unenroll error:', error);
+    res.status(500).json({ message: 'Error unenrolling from event', error: error.message });
+  }
+};
+
 // Get events by date range
 exports.getEventsByDateRange = async (req, res) => {
   try {
