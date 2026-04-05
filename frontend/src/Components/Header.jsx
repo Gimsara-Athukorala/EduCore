@@ -1,8 +1,11 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-function Header({ setCurrentPage }) {
+function Header() {
+  const navigate = useNavigate();
+
   const handleEventClick = () => {
-    setCurrentPage('events');
+    navigate('/events');
     window.scrollTo(0, 0);
   };
 
@@ -26,8 +29,9 @@ function Header({ setCurrentPage }) {
 
           {/* Navigation */}
           <nav className="flex gap-8 items-center flex-1 ml-10 hidden lg:flex">
-            <button onClick={() => { setCurrentPage('home'); window.scrollTo(0, 0); }} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</button>
+            <Link to="/" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</Link>
             <button onClick={handleEventClick} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Events</button>
+            <Link to="/lost-found" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Lost & Found</Link>
             <a href="#about" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">About</a>
             <a href="#help" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Help</a>
           </nav>
@@ -40,12 +44,12 @@ function Header({ setCurrentPage }) {
                 <path d="M12 12L17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
-            <button className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="User Profile">
+            <Link to="/admin/lost-found" className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="Admin Panel">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/>
                 <path d="M3 17C3 13.5 6.2 11 10 11C13.8 11 17 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

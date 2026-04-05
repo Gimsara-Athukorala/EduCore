@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-function Footer({ setCurrentPage }) {
+function Footer() {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
 
   const handleContactClick = () => {
-    setCurrentPage('contact');
+    navigate('/contact');
     window.scrollTo(0, 0);
   };
 
@@ -23,7 +25,7 @@ function Footer({ setCurrentPage }) {
                 </svg>
               </a>
               <a href="#twitter" className="flex items-center justify-center w-9 h-9 bg-white/15 text-white rounded-lg hover:bg-secondary transition-colors" title="Twitter">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M17 2C16.4 2.3 15.7 2.5 15 2.7C15.7 2.2 16.2 1.5 16.5 0.7C15.8 1.1 15 1.4 14.1 1.6C13.5 1 12.6 0.5 11.6 0.5C9.6 0.5 8 2.1 8 4C8 4.3 8 4.6 8.1 4.8C5.3 4.7 2.8 3.2 1.3 1C0.9 1.7 0.7 2.5 0.7 3.3C0.7 4.9 1.6 6.2 2.9 6.9C2.3 6.9 1.9 6.7 1.5 6.5V6.6C1.5 8.3 2.8 9.6 4.5 10C4.1 10.1 3.7 10.2 3.3 10.2C3 10.2 2.7 10.1 2.5 10.1C3 11.4 4.4 12.4 6.1 12.4C4.8 13.3 3.2 13.9 1.5 13.9C1.2 13.9 0.8 13.9 0.5 13.8C2.2 14.8 4.3 15.4 6.6 15.4C11.6 15.4 15.2 10.7 15.2 5.2L15.1 4.6C15.8 4.1 16.4 3.5 17 2.8Z"/>
                 </svg>
               </a>
@@ -39,7 +41,8 @@ function Footer({ setCurrentPage }) {
           <div>
             <h4 className="text-sm font-bold text-white mb-4 uppercase tracking-widest">Quick Links</h4>
             <ul className="space-y-3">
-              <li><button onClick={() => { setCurrentPage('events'); window.scrollTo(0, 0); }} className="text-gray-300 text-sm hover:text-white transition-colors duration-200">Events</button></li>
+              <li><Link to="/events" className="text-gray-300 text-sm hover:text-white transition-colors duration-200">Events</Link></li>
+              <li><Link to="/lost-found" className="text-gray-300 text-sm hover:text-white transition-colors duration-200">Lost & Found</Link></li>
               <li><a href="#calendar" className="text-gray-300 text-sm hover:text-white transition-colors duration-200">Calendar</a></li>
               <li><a href="#resources" className="text-gray-300 text-sm hover:text-white transition-colors duration-200">Resources</a></li>
             </ul>
