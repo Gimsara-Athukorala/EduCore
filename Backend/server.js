@@ -1,19 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 const app = express();
+const MONGODB_URI = "mongodb+srv://akilauddeepaba2002_db_user:byP2x1opTbCoCabl@cluster0.l8xgdvw.mongodb.net/educore?retryWrites=true&w=majority";
+const PORT = 5000;
 
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI;
-    if (!mongoURI) {
-      throw new Error('MONGODB_URI not found in environment variables');
-    }
-
-    await mongoose.connect(mongoURI, {
+    await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -32,7 +28,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Also increase
 
 // Routes
 const eventRoutes = require('./Routes/eventRoutes');
+const lostItemRoutes = require('./Routes/lostItemRoutes');
+const foundItemRoutes = require('./Routes/foundItemRoutes');
+const claimRoutes = require('./Routes/claimRoutes');
+const adminRoutes = require('./Routes/adminRouteslostFound');
+
 app.use('/api/events', eventRoutes);
+app.use('/api/lost-items', lostItemRoutes);
+app.use('/api/found-items', foundItemRoutes);
+app.use('/api/claims', claimRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -50,8 +55,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
-
 const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => {
