@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Users, FileText, Lock } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatNumber } from '../../utils/formatters';
-import Badge from '../../components/Badge';
+import Badge from '../../Components/Badge';
 
 const SocietyCard = ({ society }) => {
   const {

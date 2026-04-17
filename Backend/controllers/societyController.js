@@ -1,15 +1,15 @@
-const { Society, SocietyJoiSchema } = require('../models/Society');
-const User = require('../models/User');
-const ActivityLog = require('../models/ActivityLog');
+const { Society, SocietyJoiSchema } = require('../Model/Society');
+const Admin = require('../Model/Admin');
 const asyncHandler = require('../middleware/asyncHandler');
-const storageService = require('../services/storageService');
+const fs = require('fs').promises;
+const path = require('path');
 const joi = require('joi');
 
 /**
  * @desc Create a new university society
  * @route POST /api/v1/societies
  * @access Private (Admin, Society Leader)
- * @param {Object} req.body - { name, description, category, isPublic, tags }
+ * @param {Object} req.body - { name, description, category, i sPublic, tags }
  * @returns {Object} { success, data: Society }
  */
 exports.createSociety = asyncHandler(async (req, res, next) => {
@@ -25,21 +25,13 @@ exports.createSociety = asyncHandler(async (req, res, next) => {
   // Auto-assign leader and add as first member
   const societyData = {
     ...value,
-    leader: req.user._id,
-    members: [{ user: req.user._id, role: 'moderator' }],
+    leader: req.admin.id,
+    members: [{ user: req.admin.id, role: 'moderator' }],
     memberCount: 1,
-    createdBy: req.user._id
+    createdBy: req.admin.id
   };
 
   const society = await Society.create(societyData);
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'created_society',
-    description: `Created a new society: <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
-  });
 
   // Return populated leader
   const populatedSociety = await Society.findById(society._id).populate('leader', 'name email');
@@ -106,14 +98,14 @@ exports.getSocietyBySlug = asyncHandler(async (req, res, next) => {
   }
 
   // Conditional privacy logic
-  const isMember = req.user ? society.isMember(req.user._id) : false;
-  const isLeader = req.user ? society.isLeader(req.user._id) : false;
+  const isMember = req.admin ? society.isMember(req.admin.id) : false;
+  const isLeader = req.admin ? society.isLeader(req.admin.id) : false;
 
   // Clone object to modify
   const result = society.toObject({ virtuals: true });
 
   // If society is not public and user is not a member/leader, omit members array
-  if (!society.isPublic && !isMember && !isLeader && req.user?.role !== 'admin') {
+  if (!society.isPublic && !isMember && !isLeader && req.admin?.role !== 'admin') {
     delete result.members;
   }
 
@@ -138,23 +130,15 @@ exports.joinSociety = asyncHandler(async (req, res, next) => {
   }
 
   // Check if already a member
-  if (society.isMember(req.user._id)) {
+  if (society.isMember(req.admin.id)) {
     res.status(400);
     throw new Error('You are already a member of this society');
   }
 
   // Atomic update to add member and increment count
   await Society.findByIdAndUpdate(req.params.id, {
-    $addToSet: { members: { user: req.user._id, role: 'member' } },
+    $addToSet: { members: { user: req.admin.id, role: 'member' } },
     $inc: { memberCount: 1 }
-  });
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'joined_society',
-    description: `Joined the society <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
   });
 
   res.status(200).json({
@@ -178,29 +162,21 @@ exports.leaveSociety = asyncHandler(async (req, res, next) => {
   }
 
   // Leader cannot leave
-  if (society.isLeader(req.user._id)) {
+  if (society.isLeader(req.admin.id)) {
     res.status(400);
     throw new Error('Leader cannot leave. You must transfer leadership first.');
   }
 
   // Check if member
-  if (!society.isMember(req.user._id)) {
+  if (!society.isMember(req.admin.id)) {
     res.status(400);
     throw new Error('You are not a member of this society');
   }
 
   // Atomic update to remove member and decrement count
   await Society.findByIdAndUpdate(req.params.id, {
-    $pull: { members: { user: req.user._id } },
+    $pull: { members: { user: req.admin.id } },
     $inc: { memberCount: -1 }
-  });
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'left_society',
-    description: `Left the society <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
   });
 
   res.status(200).json({
@@ -223,7 +199,7 @@ exports.updateSociety = asyncHandler(async (req, res, next) => {
   }
 
   // Authorization check: Admin or Leader
-  if (req.user.role !== 'admin' && !society.isLeader(req.user._id)) {
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
     res.status(403);
     throw new Error('Not authorized to update this society');
   }
@@ -252,14 +228,6 @@ exports.updateSociety = asyncHandler(async (req, res, next) => {
     runValidators: true
   });
 
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'updated_society',
-    description: `Updated details for <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
-  });
-
   res.status(200).json({
     success: true,
     data: society
@@ -283,14 +251,6 @@ exports.deleteSociety = asyncHandler(async (req, res, next) => {
   society.isActive = false;
   await society.save();
 
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'deleted_society',
-    description: `Deactivated the society <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
-  });
-
   res.status(200).json({
     success: true,
     message: 'Society deactivated successfully'
@@ -311,7 +271,7 @@ exports.uploadResource = asyncHandler(async (req, res, next) => {
   }
 
   // Authorization: Admin or Leader
-  if (req.user.role !== 'admin' && !society.isLeader(req.user._id)) {
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
     res.status(403);
     throw new Error('Not authorized to upload resources to this society');
   }
@@ -321,30 +281,20 @@ exports.uploadResource = asyncHandler(async (req, res, next) => {
     throw new Error('Please upload a file');
   }
 
-  const filename = await storageService.saveFile(req.file);
-
   const resource = {
-    filename,
+    filename: req.file.filename,
     originalName: req.file.originalname,
     fileType: req.file.mimetype.includes('image') ? 'image' : 
               req.file.mimetype.includes('video') ? 'video' : 
               req.file.mimetype.includes('pdf') ? 'pdf' : 'other',
     size: req.file.size,
-    url: storageService.getFileUrl(filename),
-    uploadedBy: req.user._id,
+    url: `/uploads/societies/${req.file.filename}`,
+    uploadedBy: req.admin.id,
     uploadedAt: Date.now()
   };
 
   society.resources.push(resource);
   await society.save();
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'uploaded_resource',
-    description: `Uploaded a resource: <b>${resource.originalName}</b> to <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
-  });
 
   res.status(200).json({
     success: true,
@@ -373,25 +323,22 @@ exports.deleteResource = asyncHandler(async (req, res, next) => {
   }
 
   // Authorization: Admin or Uploader
-  if (req.user.role !== 'admin' && resource.uploadedBy.toString() !== req.user._id.toString()) {
+  if (req.admin.role !== 'admin' && resource.uploadedBy.toString() !== req.admin.id.toString()) {
     res.status(403);
     throw new Error('Not authorized to delete this resource');
   }
 
   // Delete from storage
-  await storageService.deleteFile(resource.filename);
+  const filePath = path.join(__dirname, '..', 'uploads', 'societies', resource.filename);
+  try {
+    await fs.unlink(filePath);
+  } catch (err) {
+    console.warn(`Could not delete file at ${filePath}: ${err.message}`);
+  }
 
-  // Remove using Mongoose's Document.remove() or filter
+  // Remove from array
   society.resources.pull(req.params.resourceId);
   await society.save();
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'deleted_resource',
-    description: `Deleted a resource from <b>${society.name}</b>`,
-    metadata: { societyId: society._id, societyName: society.name }
-  });
 
   res.status(200).json({
     success: true,
@@ -414,7 +361,7 @@ exports.removeMember = asyncHandler(async (req, res, next) => {
   }
 
   // Authorization: Admin or Leader
-  if (req.user.role !== 'admin' && !society.isLeader(req.user._id)) {
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
     res.status(403);
     throw new Error('Not authorized to remove members');
   }
@@ -429,14 +376,6 @@ exports.removeMember = asyncHandler(async (req, res, next) => {
   society.members = society.members.filter(m => m.user.toString() !== userId);
   society.memberCount = society.members.length;
   await society.save();
-
-  // Log activity (using system_alert or new action)
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'system_alert',
-    description: `Removed a member from <b>${society.name}</b>`,
-    metadata: { societyId: society._id, targetUserId: userId }
-  });
 
   res.status(200).json({
     success: true,
@@ -466,7 +405,7 @@ exports.updateMemberRole = asyncHandler(async (req, res, next) => {
   }
 
   // Authorization: Admin or Leader
-  if (req.user.role !== 'admin' && !society.isLeader(req.user._id)) {
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
     res.status(403);
     throw new Error('Not authorized to update member roles');
   }
@@ -481,14 +420,6 @@ exports.updateMemberRole = asyncHandler(async (req, res, next) => {
   // Update role
   society.members[memberIndex].role = role;
   await society.save();
-
-  // Log activity
-  await ActivityLog.create({
-    user: req.user._id,
-    action: 'role_updated',
-    description: `Updated member role to <b>${role}</b> in <b>${society.name}</b>`,
-    metadata: { societyId: society._id, targetUserId: userId, newRole: role }
-  });
 
   res.status(200).json({
     success: true,

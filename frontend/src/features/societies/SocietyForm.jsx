@@ -4,8 +4,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Info } from 'lucide-react';
 import { societySchema, CATEGORIES_LIST } from './societySchema';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
+import Input from '../../Components/Input';
+import Button from '../../Components/Button';
 import { cn } from '../../utils/cn';
 import { useNavigate } from 'react-router-dom';
 

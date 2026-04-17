@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Filter } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
-import SearchInput from '../../components/SearchInput';
-import Button from '../../components/Button';
-import Badge from '../../components/Badge';
+import SearchInput from '../../Components/SearchInput';
+import Button from '../../Components/Button';
+import Badge from '../../Components/Badge';
 import { cn } from '../../utils/cn';
 
 const CATEGORIES = [

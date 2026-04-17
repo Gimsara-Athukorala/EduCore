@@ -11,8 +11,8 @@ const {
   removeMember,
   updateMemberRole
 } = require('../controllers/societyController');
-const { SocietyJoiSchema } = require('../models/Society');
-const { protect, authorize } = require('../middleware/auth');
+const { SocietyJoiSchema } = require('../Model/Society');
+const { requireAdminAuth } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 const validate = require('../middleware/validate');
 const express = require('express');
@@ -54,31 +54,31 @@ router.get('/:slug', readLimiter, getSocietyBySlug);
 // Description: Create a new society
 // Auth required: Yes
 // Roles allowed: admin, society_leader
-router.post('/', protect, authorize('admin', 'society_leader'), writeLimiter, validate(SocietyJoiSchema), createSociety);
+router.post('/', requireAdminAuth, writeLimiter, validate(SocietyJoiSchema), createSociety);
 
 // PUT /api/v1/societies/:id
 // Description: Update society details
 // Auth required: Yes
 // Roles allowed: admin, owner (leader)
-router.put('/:id', protect, authorize('admin', 'society_leader'), writeLimiter, updateSociety);
+router.put('/:id', requireAdminAuth, writeLimiter, updateSociety);
 
 // DELETE /api/v1/societies/:id
 // Description: Soft delete society
 // Auth required: Yes
 // Roles allowed: admin
-router.delete('/:id', protect, authorize('admin'), writeLimiter, deleteSociety);
+router.delete('/:id', requireAdminAuth, writeLimiter, deleteSociety);
 
 // POST /api/v1/societies/:id/join
 // Description: Join a society
 // Auth required: Yes
 // Roles allowed: student, society_leader
-router.post('/:id/join', protect, authorize('student', 'society_leader'), writeLimiter, joinSociety);
+router.post('/:id/join', requireAdminAuth, writeLimiter, joinSociety);
 
 // POST /api/v1/societies/:id/leave
 // Description: Leave a society
 // Auth required: Yes
 // Roles allowed: student, society_leader
-router.post('/:id/leave', protect, authorize('student', 'society_leader'), writeLimiter, leaveSociety);
+router.post('/:id/leave', requireAdminAuth, writeLimiter, leaveSociety);
 
 // POST /api/v1/societies/:id/resources
 // Description: Upload resource to society
@@ -86,10 +86,9 @@ router.post('/:id/leave', protect, authorize('student', 'society_leader'), write
 // Roles allowed: admin, owner (leader)
 router.post(
   '/:id/resources',
-  protect,
-  authorize('admin', 'society_leader'),
+  requireAdminAuth,
   writeLimiter,
-  upload.single('file'), // Multer middleware
+  upload.single('file', 'societies'), // Multer middleware
   uploadResource
 );
 
@@ -97,18 +96,18 @@ router.post(
 // Description: Delete resource from society
 // Auth required: Yes
 // Roles allowed: admin, uploader
-router.delete('/:id/resources/:resourceId', protect, writeLimiter, deleteResource);
+router.delete('/:id/resources/:resourceId', requireAdminAuth, writeLimiter, deleteResource);
 
 // DELETE /api/v1/societies/:slug/members/:userId
 // Description: Remove member from society
 // Auth required: Yes
 // Roles allowed: admin, society_leader
-router.delete('/:slug/members/:userId', protect, authorize('admin', 'society_leader'), writeLimiter, removeMember);
+router.delete('/:slug/members/:userId', requireAdminAuth, writeLimiter, removeMember);
 
 // PATCH /api/v1/societies/:slug/members/:userId/role
 // Description: Update member role
 // Auth required: Yes
 // Roles allowed: admin, society_leader
-router.patch('/:slug/members/:userId/role', protect, authorize('admin', 'society_leader'), writeLimiter, updateMemberRole);
+router.patch('/:slug/members/:userId/role', requireAdminAuth, writeLimiter, updateMemberRole);
 
 module.exports = router;

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Lock, UserMinus } from 'lucide-react';
-import EmptyState from '../../components/EmptyState';
-import Avatar from '../../components/Avatar';
-import Badge from '../../components/Badge';
-import SearchInput from '../../components/SearchInput';
-import Button from '../../components/Button';
+import EmptyState from '../../Components/EmptyState';
+import Avatar from '../../Components/Avatar';
+import Badge from '../../Components/Badge';
+import SearchInput from '../../Components/SearchInput';
+import Button from '../../Components/Button';
 import { formatDate } from '../../utils/formatters';
 
 const MembersTab = ({ members = [], isPublic, isMember, isLeader, isAdmin }) => {

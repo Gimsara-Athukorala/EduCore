@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SocietyCard, { SocietyCardSkeleton } from './SocietyCard';
-import EmptyState from '../../components/EmptyState';
+import EmptyState from '../../Components/EmptyState';
 
 const SocietyGrid = ({ societies = [], isLoading, isEmpty }) => {
   if (isLoading) {

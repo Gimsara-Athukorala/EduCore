@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { User, Calendar, Folder } from 'lucide-react';
 import { formatDate } from '../../utils/formatters';
-import Badge from '../../components/Badge';
+import Badge from '../../Components/Badge';
 
 const AboutTab = ({ society }) => {
   const { description, tags, createdAt, leader, category } = society;

@@ -6,8 +6,8 @@ import { useAuthStore } from '../store/authStore';
 import { useGetSocieties, usePrefetchNextPage } from '../hooks/useSocieties';
 import SocietyFilters from '../features/societies/SocietyFilters';
 import SocietyGrid from '../features/societies/SocietyGrid';
-import Pagination from '../components/Pagination';
-import Button from '../components/Button';
+import Pagination from '../Components/Pagination';
+import Button from '../Components/Button';
 
 const SocietiesPage = () => {
   const navigate = useNavigate();

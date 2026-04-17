@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ResourceUploadZone from './ResourceUploadZone';
 import ResourceCard from './ResourceCard';
-import EmptyState from '../../components/EmptyState';
+import EmptyState from '../../Components/EmptyState';
 import { useDeleteResource } from '../../hooks/useResources';
 import { cn } from '../../utils/cn';
 

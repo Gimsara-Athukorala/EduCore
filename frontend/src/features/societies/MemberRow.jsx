@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { Shield, ShieldOff, UserMinus, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatDate } from '../../utils/formatters';
-import Avatar from '../../components/Avatar';
-import Badge from '../../components/Badge';
-import Button from '../../components/Button';
+import Avatar from '../../Components/Avatar';
+import Badge from '../../Components/Badge';
+import Button from '../../Components/Button';
 
 const MemberRow = ({ member, isLeader, isAdmin, onRemove, onPromote, isRemoving }) => {
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);

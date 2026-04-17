@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tabs from '../../components/Tabs';
+import Tabs from '../../Components/Tabs';
 
 const SocietyTabs = ({ society, activeTab, onTabChange, isMember }) => {
   const { memberCount, resourceCount, isPublic } = society;

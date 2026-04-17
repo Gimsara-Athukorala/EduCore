@@ -4,9 +4,9 @@ import SocietyForm from '../features/societies/SocietyForm';
 import { useGetSociety } from '../hooks/useSociety';
 import { useUpdateSociety } from '../hooks/useSocietyMutations';
 import { useAuthStore } from '../store/authStore';
-import Spinner from '../components/Spinner';
-import EmptyState from '../components/EmptyState';
-import Button from '../components/Button';
+import Spinner from '../Components/Spinner';
+import EmptyState from '../Components/EmptyState';
+import Button from '../Components/Button';
 
 const EditSocietyPage = () => {
   const { slug } = useParams();

@@ -5,9 +5,9 @@ import { useGetSociety } from '../hooks/useSociety';
 import { useGetMembers } from '../hooks/useMembers';
 import { useAuthStore } from '../store/authStore';
 import MemberManagement from '../features/societies/MemberManagement';
-import EmptyState from '../components/EmptyState';
-import Button from '../components/Button';
-import Spinner from '../components/Spinner';
+import EmptyState from '../Components/EmptyState';
+import Button from '../Components/Button';
+import Spinner from '../Components/Spinner';
 
 const MemberManagementPage = () => {
   const { slug } = useParams();

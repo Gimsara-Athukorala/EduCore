@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { Users, FileText, Lock, Settings, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import Button from '../../components/Button';
-import Badge from '../../components/Badge';
+import Button from '../../Components/Button';
+import Badge from '../../Components/Badge';
 import { formatNumber } from '../../utils/formatters';
 
 const SocietyHero = ({ society, isMember, isLeader, isAdmin, onJoin, onLeave, joinLoading, onDelete }) => {

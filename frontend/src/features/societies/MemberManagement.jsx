@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRemoveMember, usePromoteMember } from '../../hooks/useMembers';
 import MemberRow from './MemberRow';
-import SearchInput from '../../components/SearchInput';
-import EmptyState from '../../components/EmptyState';
-import Spinner from '../../components/Spinner';
+import SearchInput from '../../Components/SearchInput';
+import EmptyState from '../../Components/EmptyState';
+import Spinner from '../../Components/Spinner';
 
 const TABS = ['All', 'Moderators', 'Members'];
 

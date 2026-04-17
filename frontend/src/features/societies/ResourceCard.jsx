@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Download, Trash2, Loader2 } from 'lucide-react';
 import { formatFileSize, formatDate } from '../../utils/formatters';
-import FileTypeIcon from '../../components/FileTypeIcon';
-import Button from '../../components/Button';
+import FileTypeIcon from '../../Components/FileTypeIcon';
+import Button from '../../Components/Button';
 
 const ResourceCard = ({ resource, canDelete, onDelete, isDeleting }) => {
   const [showConfirm, setShowConfirm] = useState(false);

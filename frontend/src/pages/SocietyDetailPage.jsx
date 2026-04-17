@@ -7,9 +7,9 @@ import SocietyTabs from '../features/societies/SocietyTabs';
 import AboutTab from '../features/societies/AboutTab';
 import MembersTab from '../features/societies/MembersTab';
 import ResourcesTab from '../features/societies/ResourcesTab';
-import EmptyState from '../components/EmptyState';
-import Button from '../components/Button';
-import Spinner from '../components/Spinner';
+import EmptyState from '../Components/EmptyState';
+import Button from '../Components/Button';
+import Spinner from '../Components/Spinner';
 
 const SocietyDetailPage = () => {
   const { slug } = useParams();
