@@ -20,6 +20,8 @@ import {
   Info
 } from 'lucide-react';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function ClaimItemPage() {
   const { itemId } = useParams();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ function ClaimItemPage() {
   const fetchItemDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/found-items/${itemId}`);
+      const response = await fetch(`${API_BASE_URL}/api/found-items/${itemId}`);
       const data = await response.json();
       
       if (data.success) {
@@ -119,7 +121,7 @@ function ClaimItemPage() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/claims', {
+      const response = await fetch(`${API_BASE_URL}/api/claims`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -256,7 +258,7 @@ function ClaimItemPage() {
               <div className="md:flex">
                 <div className="md:w-1/3 h-64 md:h-auto">
                   <img 
-                    src={`http://localhost:5000/${item.imageUrl}`} 
+                    src={`${API_BASE_URL}/${item.imageUrl}`} 
                     alt={item.itemName} 
                     className="w-full h-full object-cover"
                     onError={(e) => {

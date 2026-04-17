@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { requireAdminAuth } = require('../middleware/authMiddleware');
 const {
   getDashboardStats,
   getPendingItems,
@@ -56,6 +57,8 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: fileFilter
 });
+
+router.use(requireAdminAuth);
 
 // Dashboard stats
 router.get('/stats', getDashboardStats);

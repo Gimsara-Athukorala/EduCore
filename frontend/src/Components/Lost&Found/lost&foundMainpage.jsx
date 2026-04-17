@@ -27,6 +27,8 @@ import {
   Filter
 } from 'lucide-react';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function LostItemsPage() {
   const navigate = useNavigate();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -65,7 +67,7 @@ function LostItemsPage() {
   const fetchLostItems = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/lost-items');
+      const response = await fetch(`${API_BASE_URL}/api/lost-items`);
       const data = await response.json();
       if (data.success) {
         setLostItems(data.data);
@@ -241,7 +243,7 @@ function LostItemsPage() {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/lost-items', {
+      const response = await fetch(`${API_BASE_URL}/api/lost-items`, {
         method: 'POST',
         body: formDataToSend
       });
@@ -489,7 +491,7 @@ function LostItemsPage() {
                       }`}
                     >
                       <img 
-                        src={item.imageUrl ? `http://localhost:5000/${item.imageUrl}` : 'https://via.placeholder.com/800x500?text=No+Image'} 
+                        src={item.imageUrl ? `${API_BASE_URL}/${item.imageUrl}` : 'https://via.placeholder.com/800x500?text=No+Image'} 
                         alt={item.itemName} 
                         className="w-full h-full object-cover" 
                       />
@@ -570,7 +572,7 @@ function LostItemsPage() {
                 <div key={item._id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all overflow-hidden group">
                   <div className="relative h-56 overflow-hidden">
                     <img 
-                      src={item.imageUrl ? `http://localhost:5000/${item.imageUrl}` : 'https://via.placeholder.com/400x300?text=No+Image'} 
+                      src={item.imageUrl ? `${API_BASE_URL}/${item.imageUrl}` : 'https://via.placeholder.com/400x300?text=No+Image'} 
                       alt={item.itemName} 
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
                       onError={(e) => {
