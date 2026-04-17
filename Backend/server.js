@@ -40,6 +40,7 @@ const foundItemRoutes = require('./Routes/foundItemRoutes');
 const claimRoutes = require('./Routes/claimRoutes');
 const adminRoutes = require('./Routes/adminRouteslostFound');
 const authRoutes = require('./Routes/authRoutes');
+const societyRoutes = require('./Routes/societyRoutes');
 
 app.use('/api/events', eventRoutes);
 app.use('/api/lost-items', lostItemRoutes);
@@ -47,6 +48,7 @@ app.use('/api/found-items', foundItemRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/v1/societies', societyRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

@@ -10,6 +10,11 @@ import ClaimItemPage from './Components/Lost&Found/claimItmes';
 import AdminLostFoundPage from './Components/Lost&Found/AdminLostFoundPage';
 import AdminLoginPage from './Pages/AdminLoginPage';
 import AdminRouteGuard from './Components/Navigations/AdminRouteGuard';
+import SocietiesPage from './pages/SocietiesPage';
+import SocietyDetailPage from './pages/SocietyDetailPage';
+import CreateSocietyPage from './pages/CreateSocietyPage';
+import EditSocietyPage from './pages/EditSocietyPage';
+import MemberManagementPage from './pages/MemberManagementPage';
 
 function AppLayout() {
   const location = useLocation();
@@ -45,6 +50,11 @@ function AppLayout() {
               </AdminRouteGuard>
             }
           />
+          <Route path="/societies" element={<SocietiesPage />} />
+          <Route path="/societies/:id" element={<SocietyDetailPage />} />
+          <Route path="/societies/create" element={<CreateSocietyPage />} />
+          <Route path="/societies/:id/edit" element={<EditSocietyPage />} />
+          <Route path="/societies/:id/members" element={<MemberManagementPage />} />
         </Routes>
       </main>
 

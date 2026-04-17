@@ -11,7 +11,15 @@
     "react": "^18.2.0",
     "react-big-calendar": "^1.8.5",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.14.0"
+    "react-router-dom": "^7.14.0",
+    "@tanstack/react-query": "^5.40.0",
+    "react-hook-form": "^7.51.5",
+    "@hookform/resolvers": "^3.4.2",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.2",
+    "react-hot-toast": "^2.4.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0"
   },
   "scripts": {
     "dev": "react-scripts start",
