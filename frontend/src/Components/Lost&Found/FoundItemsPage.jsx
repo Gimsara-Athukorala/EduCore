@@ -36,6 +36,8 @@ import {
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function FoundItemsPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -75,7 +77,7 @@ function FoundItemsPage() {
   const fetchFoundItems = async () => {
     try {
       setLoading(true);
-      let url = `http://localhost:5000/api/found-items?foundBy=${activeTab}`;
+      let url = `${API_BASE_URL}/api/found-items?foundBy=${activeTab}`;
       if (selectedCategory !== 'All') {
         url += `&category=${selectedCategory}`;
       }
@@ -214,7 +216,7 @@ function FoundItemsPage() {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/found-items', {
+      const response = await fetch(`${API_BASE_URL}/api/found-items`, {
         method: 'POST',
         body: formDataToSend
       });
@@ -255,7 +257,7 @@ function FoundItemsPage() {
   };
 
   const handleClaimItem = (item) => {
-    navigate(`/claim-item/${item._id}`, { state: { item } });
+    navigate(`/claim/${item._id}`, { state: { item } });
   };
 
   const categories = ["All", "Electronics", "Books", "Personal", "Accessories", "Documents", "Clothing", "Other"];
@@ -438,7 +440,7 @@ function FoundItemsPage() {
                         idx === currentSlideIndex ? "opacity-100 z-10" : "opacity-0 z-0"
                       }`}
                     >
-                      <img src={`http://localhost:5000/${item.imageUrl}`} alt={item.itemName} className="w-full h-full object-cover" />
+                      <img src={`${API_BASE_URL}/${item.imageUrl}`} alt={item.itemName} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                           <h3 className="text-3xl font-bold mb-2">{item.itemName}</h3>
@@ -521,7 +523,7 @@ function FoundItemsPage() {
               {displayedItems.map((item) => (
                 <div key={item._id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all overflow-hidden group">
                   <div className="relative h-56 overflow-hidden">
-                    <img src={`http://localhost:5000/${item.imageUrl}`} alt={item.itemName} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                    <img src={`${API_BASE_URL}/${item.imageUrl}`} alt={item.itemName} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                     <div className="absolute top-3 right-3 flex gap-2">
                       <span className="bg-[#FFFFFF] px-3 py-1 rounded-lg text-xs font-bold text-[#1E3A8A] shadow-md">
                         {item.category}

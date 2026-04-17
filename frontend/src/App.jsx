@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
 import EventsPage from './Pages/EventsPage';
@@ -8,27 +8,55 @@ import LostFoundMainPage from './Components/Lost&Found/lost&foundMainpage';
 import FoundItemsPage from './Components/Lost&Found/FoundItemsPage';
 import ClaimItemPage from './Components/Lost&Found/claimItmes';
 import AdminLostFoundPage from './Components/Lost&Found/AdminLostFoundPage';
+import AdminLoginPage from './Pages/AdminLoginPage';
+import AdminRouteGuard from './Components/Navigations/AdminRouteGuard';
+
+function AppLayout() {
+  const location = useLocation();
+  const isAdminRoute =
+    location.pathname.startsWith('/admin/') || location.pathname === '/admin-lost-found';
+
+  return (
+    <div className="flex flex-col min-h-screen bg-light">
+      {!isAdminRoute && <Header />}
+
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<EventsPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/lost-found" element={<LostFoundMainPage />} />
+          <Route path="/found-items" element={<FoundItemsPage />} />
+          <Route path="/claim/:itemId" element={<ClaimItemPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/lost-found"
+            element={
+              <AdminRouteGuard>
+                <AdminLostFoundPage />
+              </AdminRouteGuard>
+            }
+          />
+          <Route
+            path="/admin-lost-found"
+            element={
+              <AdminRouteGuard>
+                <AdminLostFoundPage />
+              </AdminRouteGuard>
+            }
+          />
+        </Routes>
+      </main>
+
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen bg-light">
-        <Header />
-
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<EventsPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/contact" element={<ContactUsPage />} />
-            <Route path="/lost-found" element={<LostFoundMainPage />} />
-            <Route path="/found-items" element={<FoundItemsPage />} />
-            <Route path="/claim/:itemId" element={<ClaimItemPage />} />
-            <Route path="/admin/lost-found" element={<AdminLostFoundPage />} />
-          </Routes>
-        </main>
-
-        <Footer />
-      </div>
+      <AppLayout />
     </Router>
   );
 }

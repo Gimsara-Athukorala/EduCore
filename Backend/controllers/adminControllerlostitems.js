@@ -22,15 +22,6 @@ const deleteImageFile = async (imagePath) => {
 // @route   GET /api/admin/stats
 const getDashboardStats = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const pendingLost = await LostItem.countDocuments({ status: 'pending' });
     const pendingFound = await FoundItem.countDocuments({ status: 'pending' });
     const pendingClaims = await Claim.countDocuments({ status: 'pending' });
@@ -76,15 +67,6 @@ const getDashboardStats = async (req, res) => {
 // @route   GET /api/admin/pending
 const getPendingItems = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const pendingLost = await LostItem.find({ status: 'pending' }).sort({ createdAt: -1 });
     const pendingFound = await FoundItem.find({ status: 'pending' }).sort({ createdAt: -1 });
     const pendingClaims = await Claim.find({ status: 'pending' }).sort({ createdAt: -1 });
@@ -111,15 +93,6 @@ const getPendingItems = async (req, res) => {
 // @route   GET /api/admin/accepted
 const getAcceptedItems = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const acceptedLost = await LostItem.find({ status: 'approved' }).sort({ createdAt: -1 });
     const acceptedFound = await FoundItem.find({ status: 'approved' }).sort({ createdAt: -1 });
     const acceptedClaims = await Claim.find({ status: 'approved' }).sort({ createdAt: -1 });
@@ -146,15 +119,6 @@ const getAcceptedItems = async (req, res) => {
 // @route   GET /api/admin/pending-claims
 const getPendingClaimsWithImages = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const pendingClaims = await Claim.find({ status: 'pending' })
       .sort({ createdAt: -1 });
 
@@ -176,14 +140,7 @@ const getPendingClaimsWithImages = async (req, res) => {
 // @route   PUT /api/admin/lost/:id
 const updateLostItemStatus = async (req, res) => {
   try {
-    const { status, adminNotes, adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
+    const { status, adminNotes } = req.body;
 
     const lostItem = await LostItem.findById(req.params.id);
     
@@ -220,14 +177,7 @@ const updateLostItemStatus = async (req, res) => {
 // @route   PUT /api/admin/found/:id
 const updateFoundItemStatus = async (req, res) => {
   try {
-    const { status, adminNotes, adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
+    const { status, adminNotes } = req.body;
 
     const foundItem = await FoundItem.findById(req.params.id);
     
@@ -280,14 +230,7 @@ const updateFoundItemStatus = async (req, res) => {
 // @route   PUT /api/admin/claim/:id
 const updateClaimStatus = async (req, res) => {
   try {
-    const { status, rejectionReason, adminNotes, adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
+    const { status, rejectionReason, adminNotes } = req.body;
     
     const claim = await Claim.findById(req.params.id);
     
@@ -358,15 +301,6 @@ const updateClaimStatus = async (req, res) => {
 // @route   DELETE /api/admin/lost/:id
 const deleteLostItem = async (req, res) => {
   try {
-    const { adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const lostItem = await LostItem.findById(req.params.id);
     
     if (!lostItem) {
@@ -401,15 +335,6 @@ const deleteLostItem = async (req, res) => {
 // @route   DELETE /api/admin/found/:id
 const deleteFoundItem = async (req, res) => {
   try {
-    const { adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-
     const foundItem = await FoundItem.findById(req.params.id);
     
     if (!foundItem) {
@@ -447,15 +372,6 @@ const deleteFoundItem = async (req, res) => {
 // @route   DELETE /api/admin/claim/:id
 const deleteClaim = async (req, res) => {
   try {
-    const { adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-    
     const claim = await Claim.findById(req.params.id);
     
     if (!claim) {
@@ -501,16 +417,8 @@ const addManualFoundItem = async (req, res) => {
       category,
       location,
       date,
-      description,
-      adminPassword
+      description
     } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
 
     // Validate required fields
     if (!itemName || !category || !location || !date) {
@@ -566,14 +474,7 @@ const addManualFoundItem = async (req, res) => {
 // @route   GET /api/admin/claims
 const getAllClaims = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20, search, adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
+    const { status, page = 1, limit = 20, search } = req.query;
     
     const skip = (page - 1) * limit;
     let query = {};
@@ -621,15 +522,6 @@ const getAllClaims = async (req, res) => {
 // @route   GET /api/admin/claim-stats
 const getClaimStats = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-    
     const totalClaims = await Claim.countDocuments();
     const pendingClaims = await Claim.countDocuments({ status: 'pending' });
     const approvedClaims = await Claim.countDocuments({ status: 'approved' });
@@ -674,15 +566,6 @@ const getClaimStats = async (req, res) => {
 // @route   GET /api/admin/claim/:id
 const getClaimById = async (req, res) => {
   try {
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
-    
     const claim = await Claim.findById(req.params.id);
     
     if (!claim) {
@@ -710,14 +593,7 @@ const getClaimById = async (req, res) => {
 // @route   PUT /api/admin/claims/bulk
 const bulkUpdateClaims = async (req, res) => {
   try {
-    const { claimIds, status, rejectionReason, adminPassword } = req.body;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
+    const { claimIds, status, rejectionReason } = req.body;
     
     if (!claimIds || !claimIds.length) {
       return res.status(400).json({
@@ -783,14 +659,6 @@ const bulkUpdateClaims = async (req, res) => {
 const exportData = async (req, res) => {
   try {
     const { type } = req.params;
-    const { adminPassword } = req.query;
-    
-    if (adminPassword !== 'admin123') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid admin password'
-      });
-    }
     
     let data = [];
     let filename = '';

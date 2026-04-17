@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAdminToken, logoutAdmin } from '../../utils/adminAuth';
 import {
   Package,
   Search,
@@ -24,7 +25,6 @@ import {
   ExternalLink,
   MessageSquare,
   Send,
-  ArrowLeft,
   TrendingUp,
   Award,
   TrendingDown,
@@ -47,6 +47,8 @@ import {
   Fingerprint
 } from 'lucide-react';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 function AdminLostFoundPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pending-lost');
@@ -60,7 +62,6 @@ function AdminLostFoundPage() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [showClaimDetailsModal, setShowClaimDetailsModal] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
-  const [adminPassword, setAdminPassword] = useState('admin123');
   
   const [stats, setStats] = useState({
     pending: { lost: 0, found: 0, claims: 0 },
@@ -92,9 +93,40 @@ function AdminLostFoundPage() {
     }
   }, [activeTab]);
 
+  const adminFetch = async (url, options = {}) => {
+    const token = getAdminToken();
+
+    if (!token) {
+      logoutAdmin();
+      navigate('/admin/login');
+      throw new Error('Missing admin token');
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 401) {
+      logoutAdmin();
+      navigate('/admin/login');
+      throw new Error('Session expired. Please login again.');
+    }
+
+    return response;
+  };
+
+  const handleLogout = () => {
+    logoutAdmin();
+    navigate('/admin/login');
+  };
+
   const fetchStats = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/stats?adminPassword=${adminPassword}`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/stats`);
       const data = await response.json();
       if (data.success) {
         setStats(data.data);
@@ -106,7 +138,7 @@ function AdminLostFoundPage() {
 
   const fetchPendingItems = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/pending?adminPassword=${adminPassword}`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/pending`);
       const data = await response.json();
       if (data.success) {
         setPendingItems(data.data);
@@ -118,7 +150,7 @@ function AdminLostFoundPage() {
 
   const fetchAcceptedItems = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/accepted?adminPassword=${adminPassword}`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/accepted`);
       const data = await response.json();
       if (data.success) {
         setAcceptedItems(data.data);
@@ -142,23 +174,22 @@ function AdminLostFoundPage() {
       let endpoint = '';
       let body = {
         status: reviewAction === 'accept' ? 'approved' : 'rejected',
-        adminNotes: reviewComment,
-        adminPassword
+        adminNotes: reviewComment
       };
 
       if (selectedItem.type === 'lost') {
-        endpoint = `http://localhost:5000/api/admin/lost/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost/${selectedItem._id}`;
       } else if (selectedItem.type === 'found') {
-        endpoint = `http://localhost:5000/api/admin/found/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/found/${selectedItem._id}`;
       } else if (selectedItem.type === 'claim') {
-        endpoint = `http://localhost:5000/api/admin/claim/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/claim/${selectedItem._id}`;
         body.status = reviewAction === 'accept' ? 'approved' : 'rejected';
         if (reviewAction === 'reject') {
           body.rejectionReason = reviewComment;
         }
       }
 
-      const response = await fetch(endpoint, {
+      const response = await adminFetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -191,17 +222,16 @@ function AdminLostFoundPage() {
     try {
       let endpoint = '';
       if (type === 'lost') {
-        endpoint = `http://localhost:5000/api/admin/lost/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost/${item._id}`;
       } else if (type === 'found') {
-        endpoint = `http://localhost:5000/api/admin/found/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/found/${item._id}`;
       } else if (type === 'claim') {
-        endpoint = `http://localhost:5000/api/admin/claim/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/claim/${item._id}`;
       }
 
-      const response = await fetch(endpoint, {
+      const response = await adminFetch(endpoint, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminPassword })
+        headers: { 'Content-Type': 'application/json' }
       });
 
       const data = await response.json();
@@ -226,12 +256,11 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/found/${item._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/found/${item._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          status: 'returned',
-          adminPassword 
+          status: 'returned'
         })
       });
 
@@ -261,12 +290,11 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/claim/${claim._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/claim/${claim._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          status: 'approved',
-          adminPassword 
+          status: 'approved'
         })
       });
 
@@ -295,13 +323,12 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/claim/${claim._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/claim/${claim._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           status: 'rejected',
-          rejectionReason: reason,
-          adminPassword 
+          rejectionReason: reason
         })
       });
 
@@ -379,8 +406,12 @@ function AdminLostFoundPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 rounded-xl shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="h-12 w-12 rounded-xl bg-white border border-blue-100 shadow-sm flex items-center justify-center overflow-hidden">
+                <img
+                  src="/assets/EduCore_Logo.png"
+                  alt="EduCore logo"
+                  className="h-9 w-auto object-contain"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -391,18 +422,18 @@ function AdminLostFoundPage() {
             </div>
             <div className="flex gap-2">
               <button 
-                onClick={() => navigate('/lost-items')}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 rounded-xl transition-all flex items-center gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Site
-              </button>
-              <button 
                 onClick={() => { fetchStats(); fetchPendingItems(); fetchAcceptedItems(); }}
                 className="px-4 py-2 text-sm text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 rounded-xl transition-all flex items-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm text-white bg-[#1E3A8A] hover:bg-[#3B82F6] rounded-xl transition-all flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                Logout
               </button>
             </div>
           </div>
@@ -504,7 +535,7 @@ function AdminLostFoundPage() {
                 <div className="flex gap-4">
                   <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-100 to-indigo-100 shadow-sm">
                     <img 
-                      src={item.itemImageUrl ? `http://localhost:5000/${item.itemImageUrl}` : (item.imageUrl ? `http://localhost:5000/${item.imageUrl}` : 'https://via.placeholder.com/64x64?text=No+Image')} 
+                      src={item.itemImageUrl ? `${API_BASE_URL}/${item.itemImageUrl}` : (item.imageUrl ? `${API_BASE_URL}/${item.imageUrl}` : 'https://via.placeholder.com/64x64?text=No+Image')} 
                       alt={item.itemName} 
                       className="w-full h-full object-cover" 
                     />
@@ -714,7 +745,7 @@ function AdminLostFoundPage() {
                 {selectedClaim.itemImageUrl && (
                   <div className="mt-3">
                     <img 
-                      src={`http://localhost:5000/${selectedClaim.itemImageUrl}`} 
+                      src={`${API_BASE_URL}/${selectedClaim.itemImageUrl}`} 
                       alt={selectedClaim.itemName}
                       className="w-32 h-32 object-cover rounded-lg"
                     />
