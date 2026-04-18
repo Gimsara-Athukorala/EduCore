@@ -32,6 +32,7 @@ function Header() {
             <Link to="/" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</Link>
             <button onClick={handleEventClick} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Events</button>
             <Link to="/lost-found" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Lost & Found</Link>
+            <Link to="/societies" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Societies</Link>
             <a href="#about" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">About</a>
             <a href="#help" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Help</a>
           </nav>
