@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
@@ -16,6 +15,7 @@ function MainHeader() {
     { label: 'Lost & Found', path: '/lost-found' },
     { label: 'Resources', path: '/resources' },
     { label: 'Contact', path: '/contact' },
+    { label: 'About Us', path: '/about' },
   ];
 
   const isActive = (path) => location.pathname === path;

@@ -12,6 +12,23 @@ export const useCreateSociety = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['societies'] });
+      toast.success('Society created successfully!');
+    },
+    onError: (error) => {
+      console.error('[Society Creation Error]', error);
+      console.error('[Error Response]', error.response?.data);
+      
+      const message = error.response?.data?.message || 'Failed to create society.';
+      const validationErrors = error.response?.data?.errors;
+      
+      if (validationErrors && Array.isArray(validationErrors)) {
+        const errorMessages = validationErrors
+          .map(e => `${e.field}: ${e.message}`)
+          .join(' | ');
+        toast.error(errorMessages);
+      } else {
+        toast.error(message);
+      }
     },
   });
 };

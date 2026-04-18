@@ -7,6 +7,7 @@ import Footer from './Components/Footer';
 import EventsPage from './Pages/EventsPage';
 import ContactUsPage from './Pages/ContactUsPage';
 import ResourcesPage from './Pages/ResourcesPage';
+import AboutUsPage from './Components/Static/aboutus';
 import LostFoundMainPage from './Components/Lost&Found/lost&foundMainpage';
 import FoundItemsPage from './Components/Lost&Found/FoundItemsPage';
 import ClaimItemPage from './Components/Lost&Found/claimItmes';
@@ -152,6 +153,7 @@ function AppLayout() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/about" element={<AboutUsPage />} />
           <Route path="/lost-found" element={<LostFoundMainPage />} />
           <Route path="/found-items" element={<FoundItemsPage />} />
           <Route path="/claim/:itemId" element={<ClaimItemPage />} />

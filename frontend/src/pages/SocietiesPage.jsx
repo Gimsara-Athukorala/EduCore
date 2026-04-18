@@ -58,7 +58,7 @@ const SocietiesPage = () => {
         {canCreate && (
           <Button 
             size="lg"
-            className="shrink-0 group shadow-2xl shadow-blue-500/20 px-8 rounded-2xl font-bold"
+            className="shrink-0 group px-8 rounded-2xl font-bold text-white bg-gradient-to-r from-primary-700 to-primary-500 hover:from-primary-800 hover:to-primary-600 shadow-xl shadow-primary-700/25"
             onClick={() => navigate('/societies/create')}
           >
             <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-500" />
