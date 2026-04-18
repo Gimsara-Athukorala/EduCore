@@ -55,7 +55,7 @@ const claimSchema = new mongoose.Schema({
   // ID Proof
   idProofType: {
     type: String,
-    enum: ['Student ID Card', 'National ID Card', "Driver's License", 'Passport', 'Other'],
+    enum: ['Student ID', 'NIC', 'Student ID Card', 'National ID Card', "Driver's License", 'Passport', 'Other'],
     required: true
   },
   idProofNumber: {

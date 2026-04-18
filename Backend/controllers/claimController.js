@@ -22,11 +22,30 @@ const createClaim = async (req, res) => {
       additionalNotes
     } = req.body;
 
+    const normalizedStudentId = String(claimantStudentId || '').trim().toUpperCase();
+    const normalizedProofType = String(idProofType || '').trim();
+    const normalizedProofNumber = String(idProofNumber || '').trim().toUpperCase();
+    const canonicalProofTypeMap = {
+      'Student ID': 'Student ID Card',
+      'NIC': 'National ID Card',
+      'Student ID Card': 'Student ID Card',
+      'National ID Card': 'National ID Card'
+    };
+    const canonicalProofType = canonicalProofTypeMap[normalizedProofType] || normalizedProofType;
+
     // Validate required fields
     if (!itemId || !claimantFullName || !claimantStudentId || !claimantEmail || !idProofType || !idProofNumber) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields'
+      });
+    }
+
+    const allowedProofTypes = ['Student ID', 'NIC', 'Student ID Card', 'National ID Card'];
+    if (!allowedProofTypes.includes(normalizedProofType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID proof type must be Student ID or NIC'
       });
     }
 
@@ -61,7 +80,7 @@ const createClaim = async (req, res) => {
     // Check if user has already claimed this item
     const existingClaim = await Claim.findOne({
       itemId: itemId,
-      claimantStudentId: claimantStudentId.toUpperCase(),
+      claimantStudentId: normalizedStudentId,
       status: { $in: ['pending', 'approved'] }
     });
 
@@ -74,11 +93,28 @@ const createClaim = async (req, res) => {
 
     // Validate student ID format
     const studentIdPattern = /^STU\d{10}$/i;
-    if (!studentIdPattern.test(claimantStudentId)) {
+    if (!studentIdPattern.test(normalizedStudentId)) {
       return res.status(400).json({
         success: false,
         message: 'Student ID must begin with STU followed by exactly 10 digits (e.g., STU2024123456)'
       });
+    }
+
+    if (canonicalProofType === 'Student ID Card' && normalizedProofNumber !== normalizedStudentId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID proof number must match the Student ID when Student ID is selected as proof type'
+      });
+    }
+
+    if (canonicalProofType === 'National ID Card') {
+      const nicPattern = /^(?:\d{9}[VvXx]|\d{12})$/;
+      if (!nicPattern.test(String(idProofNumber).trim())) {
+        return res.status(400).json({
+          success: false,
+          message: 'NIC must be 12 digits or 9 digits followed by V/X'
+        });
+      }
     }
 
     // Validate email format
@@ -108,18 +144,18 @@ const createClaim = async (req, res) => {
       itemLocation: foundItem.location,
       itemDate: foundItem.date,
       claimantFullName: claimantFullName.trim(),
-      claimantStudentId: claimantStudentId.toUpperCase().trim(),
+      claimantStudentId: normalizedStudentId,
       claimantEmail: claimantEmail.toLowerCase().trim(),
       claimantContactNumber: claimantContactNumber || null,
-      idProofType,
-      idProofNumber: idProofNumber.trim(),
+      idProofType: canonicalProofType,
+      idProofNumber: normalizedProofNumber,
       additionalNotes: additionalNotes || '',
       status: 'pending'
     });
 
     // Update found item status to claimed
     foundItem.status = 'claimed';
-    foundItem.claimedBy = claimantStudentId;
+    foundItem.claimedBy = normalizedStudentId;
     foundItem.claimedAt = new Date();
     await foundItem.save();
 
