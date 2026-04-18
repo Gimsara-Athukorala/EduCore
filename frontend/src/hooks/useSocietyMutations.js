@@ -1,25 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosInstance from '../lib/axios';
 
 export const useCreateSociety = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async (data) => {
       const response = await axiosInstance.post('/societies', data);
       return response.data.data;
     },
-    onSuccess: (data) => {
-      toast.success('Society created!');
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['societies'] });
-      navigate(`/societies/${data.slug}`);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to create society.');
-      // The calling component will map validation errors from error.response.data.errors if available
     },
   });
 };

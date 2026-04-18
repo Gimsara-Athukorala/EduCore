@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import Spinner from '../Components/Spinner';
 import EmptyState from '../Components/EmptyState';
 import Button from '../Components/Button';
+import SocietyLeaderDashboardShell from '../Components/Navigations/SocietyLeaderDashboardShell';
 
 const EditSocietyPage = () => {
   const { slug } = useParams();
@@ -68,25 +69,27 @@ const EditSocietyPage = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-fadeUp">
-      <div className="mb-8">
-        <h1 className="text-3xl font-display font-semibold text-primary tracking-tight">
-          Edit Society
-        </h1>
-        <p className="text-muted mt-2">
-          Update the details and settings for <span className="text-primary font-medium">{society.name}</span>.
-        </p>
-      </div>
+    <SocietyLeaderDashboardShell>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 animate-fadeUp">
+        <div className="mb-8">
+          <h1 className="text-3xl font-display font-semibold text-primary tracking-tight">
+            Edit Society
+          </h1>
+          <p className="text-muted mt-2">
+            Update the details and settings for <span className="text-primary font-medium">{society.name}</span>.
+          </p>
+        </div>
 
-      <div className="bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-        <SocietyForm 
-          defaultValues={society}
-          onSubmit={handleSubmit} 
-          isLoading={isPending} 
-          mode="edit" 
-        />
+        <div className="bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-sm">
+          <SocietyForm 
+            defaultValues={society}
+            onSubmit={handleSubmit} 
+            isLoading={isPending} 
+            mode="edit" 
+          />
+        </div>
       </div>
-    </div>
+    </SocietyLeaderDashboardShell>
   );
 };
 

@@ -5,10 +5,12 @@ import EmptyState from '../../Components/EmptyState';
 
 const SocietyGrid = ({ societies = [], isLoading, isEmpty }) => {
   if (isLoading) {
+    const skeletonKeys = ['skeleton-a', 'skeleton-b', 'skeleton-c', 'skeleton-d', 'skeleton-e', 'skeleton-f'];
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <SocietyCardSkeleton key={`skeleton-${i}`} />
+        {skeletonKeys.map((key) => (
+          <SocietyCardSkeleton key={key} />
         ))}
       </div>
     );
@@ -30,7 +32,7 @@ const SocietyGrid = ({ societies = [], isLoading, isEmpty }) => {
       {societies.map((society, index) => (
         <div
           key={society._id || society.slug} // fallback to slug if _id not present
-          className="animate-fadeUp opacity-0"
+          className="animate-fadeUp"
           style={{ animationDelay: `${index * 50}ms` }}
         >
           <SocietyCard society={society} />

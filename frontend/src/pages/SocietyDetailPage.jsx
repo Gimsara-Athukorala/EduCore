@@ -1,9 +1,9 @@
+/* global globalThis */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useGetSociety, useJoinSociety, useLeaveSociety, useDeleteSociety } from '../hooks/useSociety';
 import SocietyHero from '../features/societies/SocietyHero';
-import SocietyTabs from '../features/societies/SocietyTabs';
 import AboutTab from '../features/societies/AboutTab';
 import MembersTab from '../features/societies/MembersTab';
 import ResourcesTab from '../features/societies/ResourcesTab';
@@ -15,11 +15,11 @@ const SocietyDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('about');
+  const [activeTab] = useState('about');
 
   const { data: society, isLoading, isError } = useGetSociety(slug);
-  const joinMutation = useJoinSociety(slug);
-  const leaveMutation = useLeaveSociety(slug);
+  const joinMutation = useJoinSociety(society?._id, slug);
+  const leaveMutation = useLeaveSociety(society?._id, slug);
   const deleteMutation = useDeleteSociety();
 
   useEffect(() => {
@@ -55,7 +55,8 @@ const SocietyDetailPage = () => {
 
   // Determine user permissions relative to this society
   const isLeader = society.leader?._id === user?._id;
-  const isMember = society.members?.some(m => m.user._id === user?._id) || isLeader;
+  const isMember =
+    society.members?.some((m) => m.user?._id && m.user._id === user?._id) || isLeader;
   const isAdmin = user?.role === 'admin';
 
   return (
@@ -69,17 +70,11 @@ const SocietyDetailPage = () => {
         onLeave={() => leaveMutation.mutate()}
         joinLoading={joinMutation.isPending || leaveMutation.isPending}
         onDelete={() => {
-          if(window.confirm(`Are you sure you want to hard delete "${society.name}"? This action cannot be undone.`)) {
+          // eslint-disable-next-line no-alert
+          if (globalThis.confirm(`Are you sure you want to hard delete "${society.name}"? This action cannot be undone.`)) {
             deleteMutation.mutate(society._id);
           }
         }}
-      />
-
-      <SocietyTabs 
-        society={society}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        isMember={isMember}
       />
 
       <div className="mt-8">

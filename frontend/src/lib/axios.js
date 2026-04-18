@@ -1,12 +1,11 @@
+/* global globalThis */
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const getBaseURL = () => {
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
+  const envBaseUrl = globalThis?.process?.env?.REACT_APP_API_URL;
+  if (envBaseUrl) {
+    return envBaseUrl;
   }
   return 'http://localhost:5000/api/v1';
 };
@@ -57,12 +56,12 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         // Refresh token failed -> Logout user
         useAuthStore.getState().clearAuth();
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+        globalThis.location.href = '/admin/login';
+        throw refreshError;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 

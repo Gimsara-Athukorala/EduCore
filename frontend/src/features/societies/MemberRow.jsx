@@ -10,7 +10,6 @@ import Button from '../../Components/Button';
 const MemberRow = ({ member, isLeader, isAdmin, onRemove, onPromote, isRemoving }) => {
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
   const user = member.user || {};
-  const isSelf = isLeader; // Logic for "self" would be checking if member.user._id === currentUser._id
 
   // Actually, we pass isLeader to know if the CURRENT logged in user is the leader of the society.
   // We need to know if the row we are rendering IS the leader.
@@ -19,7 +18,9 @@ const MemberRow = ({ member, isLeader, isAdmin, onRemove, onPromote, isRemoving 
   // For safety, let's assume if it's a moderator and we are in the member loop,
   // we might not want to show remove/demote if it's the original creator.
   // But standard logic: leader/admin can perform actions.
-  const canPerformActions = (isAdmin || isLeader);
+  const canPerformActions = (isAdmin || isLeader) && Boolean(user._id);
+  const displayName = user.name || member.displayName || 'Unknown User';
+  const displayEmail = user.email || member.email || 'No email';
 
   const handleRemoveClick = () => {
     if (showConfirmRemove) {
@@ -38,10 +39,10 @@ const MemberRow = ({ member, isLeader, isAdmin, onRemove, onPromote, isRemoving 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 bg-surface border-b border-border last:border-0 hover:bg-navy/30 transition-colors">
       <div className="flex items-center gap-4 mb-4 sm:mb-0">
-        <Avatar name={user.name} src={user.profilePicture} size="md" />
+        <Avatar name={displayName} src={user.profilePicture} size="md" />
         <div>
           <div className="font-medium text-primary flex items-center gap-2">
-            {user.name || 'Unknown User'}
+            {displayName}
             {rowIsModerator ? (
               <Badge label="Moderator" color="#0EA5E9" className="opacity-90" />
             ) : (
@@ -49,7 +50,7 @@ const MemberRow = ({ member, isLeader, isAdmin, onRemove, onPromote, isRemoving 
             )}
           </div>
           <div className="text-xs text-muted mt-0.5">
-            <span className="hidden sm:inline">{user.email} • </span>
+            <span className="hidden sm:inline">{displayEmail} • </span>
             Joined {formatDate(member.joinedAt)}
           </div>
         </div>
@@ -94,6 +95,8 @@ MemberRow.propTypes = {
   member: PropTypes.shape({
     role: PropTypes.string,
     joinedAt: PropTypes.string,
+    displayName: PropTypes.string,
+    email: PropTypes.string,
     user: PropTypes.shape({
       _id: PropTypes.string,
       name: PropTypes.string,

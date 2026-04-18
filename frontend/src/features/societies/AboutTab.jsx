@@ -21,8 +21,8 @@ const AboutTab = ({ society }) => {
             <div className="mt-8 pt-6 border-t border-border">
               <h3 className="text-sm font-medium text-primary mb-3">Tags</h3>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, idx) => (
-                  <Badge key={idx} label={`#${tag}`} className="bg-navy px-3 py-1 font-mono text-xs opacity-80" />
+                {tags.map((tag) => (
+                  <Badge key={tag} label={`#${tag}`} className="bg-navy px-3 py-1 font-mono text-xs opacity-80" />
                 ))}
               </div>
             </div>
@@ -42,8 +42,8 @@ const AboutTab = ({ society }) => {
           
           <dl className="space-y-5">
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-navy rounded-lg border border-border shrink-0">
-                <Folder className="w-5 h-5 text-accent" />
+              <div className="p-2.5 bg-blue-100 rounded-lg border border-blue-200 shadow-sm shrink-0">
+                <Folder className="w-5 h-5 text-blue-700" strokeWidth={2.4} />
               </div>
               <div>
                 <dt className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Category</dt>
@@ -52,8 +52,8 @@ const AboutTab = ({ society }) => {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-navy rounded-lg border border-border shrink-0">
-                <User className="w-5 h-5 text-accent" />
+              <div className="p-2.5 bg-blue-100 rounded-lg border border-blue-200 shadow-sm shrink-0">
+                <User className="w-5 h-5 text-blue-700" strokeWidth={2.4} />
               </div>
               <div>
                 <dt className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Created By</dt>
@@ -62,8 +62,8 @@ const AboutTab = ({ society }) => {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-navy rounded-lg border border-border shrink-0">
-                <Calendar className="w-5 h-5 text-accent" />
+              <div className="p-2.5 bg-blue-100 rounded-lg border border-blue-200 shadow-sm shrink-0">
+                <Calendar className="w-5 h-5 text-blue-700" strokeWidth={2.4} />
               </div>
               <div>
                 <dt className="text-xs font-medium text-muted uppercase tracking-wider mb-1">Founded On</dt>

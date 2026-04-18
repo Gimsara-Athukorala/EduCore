@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function Header({ setCurrentPage }) {
   const handleEventClick = () => {
@@ -7,7 +8,7 @@ function Header({ setCurrentPage }) {
   };
 
   return (
-    <header className="sticky top-0 z-100 bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] shadow-md">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] shadow-md">
       <div className="max-w-7xl mx-auto px-5">
         <div className="flex justify-between items-center h-20">
           {/* Brand */}
@@ -52,5 +53,9 @@ function Header({ setCurrentPage }) {
     </header>
   );
 }
+
+Header.propTypes = {
+  setCurrentPage: PropTypes.func.isRequired,
+};
 
 export default Header;
