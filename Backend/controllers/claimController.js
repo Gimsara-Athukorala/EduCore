@@ -1,5 +1,6 @@
 const Claim = require('../Model/Claim');
 const FoundItem = require('../Model/FoundItem');
+const { sendClaimApprovalEmail } = require('../utils/claimPickupMailer');
 
 // @desc    Create a new claim
 // @route   POST /api/claims
@@ -286,6 +287,28 @@ const updateClaimStatus = async (req, res) => {
         foundItem.claimedBy = claim.claimantStudentId;
         foundItem.claimedAt = new Date();
         await foundItem.save();
+      }
+
+      // Send claim pickup approval email to the claimant
+      const emailResult = await sendClaimApprovalEmail(claim, foundItem);
+      console.log('Claim approval email attempt', {
+        claimId: claim._id.toString(),
+        claimantEmail: claim.claimantEmail,
+        result: emailResult
+      });
+
+      if (!emailResult.sent) {
+        console.error('Claim approval email failed for claim:', claim._id, emailResult);
+      }
+
+      claim.pickupCode = emailResult.pickupCode || claim.pickupCode;
+      if (emailResult.sent) {
+        claim.pickupEmailSentAt = new Date();
+        claim.pickupEmailSentStatus = 'sent';
+        claim.pickupEmailError = null;
+      } else {
+        claim.pickupEmailSentStatus = 'failed';
+        claim.pickupEmailError = emailResult.error || emailResult.reason || 'Email not sent';
       }
     } else if (status === 'rejected') {
       claim.rejectionReason = rejectionReason || 'No reason provided';
