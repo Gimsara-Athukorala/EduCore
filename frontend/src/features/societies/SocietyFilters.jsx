@@ -4,7 +4,6 @@ import { Filter } from 'lucide-react';
 import { useUIStore } from '../../store/uiStore';
 import SearchInput from '../../Components/SearchInput';
 import Button from '../../Components/Button';
-import Badge from '../../Components/Badge';
 import { cn } from '../../utils/cn';
 
 const CATEGORIES = [
@@ -67,7 +66,7 @@ const SocietyFilters = ({ className }) => {
             className={cn(
               "px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-light/20",
               (filters.category || 'All') === category
-                ? "bg-primary-dark text-white shadow-xl shadow-blue-900/20"
+                ? "bg-blue-600 border border-blue-600 text-white shadow-xl shadow-blue-600/30"
                 : "bg-white text-muted border border-gray-100 hover:border-primary-light hover:text-primary-dark shadow-sm"
             )}
           >

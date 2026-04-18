@@ -10,7 +10,7 @@ function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-100 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
       <div className="max-w-7xl mx-auto px-5">
         <div className="flex justify-between items-center h-24">
           {/* Brand */}

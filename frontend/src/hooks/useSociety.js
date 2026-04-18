@@ -14,17 +14,19 @@ export const useGetSociety = (slug) => {
   });
 };
 
-export const useJoinSociety = (slug) => {
+export const useJoinSociety = (societyId, societySlug) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post(`/societies/${slug}/join`);
+      const response = await axiosInstance.post(`/societies/${societyId}/join`);
       return response.data;
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Successfully joined the society!');
-      queryClient.invalidateQueries({ queryKey: ['society', slug] });
+      if (societySlug) {
+        queryClient.invalidateQueries({ queryKey: ['society', societySlug] });
+      }
       queryClient.invalidateQueries({ queryKey: ['societies'] });
     },
     onError: (error) => {
@@ -33,17 +35,19 @@ export const useJoinSociety = (slug) => {
   });
 };
 
-export const useLeaveSociety = (slug) => {
+export const useLeaveSociety = (societyId, societySlug) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post(`/societies/${slug}/leave`);
+      const response = await axiosInstance.post(`/societies/${societyId}/leave`);
       return response.data;
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Successfully left the society.');
-      queryClient.invalidateQueries({ queryKey: ['society', slug] });
+      if (societySlug) {
+        queryClient.invalidateQueries({ queryKey: ['society', societySlug] });
+      }
       queryClient.invalidateQueries({ queryKey: ['societies'] });
     },
     onError: (error) => {

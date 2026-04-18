@@ -48,6 +48,27 @@ const SocietySchema = new Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User'
         },
+        displayName: {
+          type: String,
+          trim: true,
+          maxlength: [120, 'Display name cannot be more than 120 characters']
+        },
+        email: {
+          type: String,
+          trim: true,
+          lowercase: true,
+          maxlength: [150, 'Email cannot be more than 150 characters']
+        },
+        studentId: {
+          type: String,
+          trim: true,
+          maxlength: [30, 'Student ID cannot be more than 30 characters']
+        },
+        source: {
+          type: String,
+          enum: ['account', 'join_request'],
+          default: 'account'
+        },
         joinedAt: {
           type: Date,
           default: Date.now
@@ -63,6 +84,53 @@ const SocietySchema = new Schema(
       type: Number,
       default: 0
     },
+    joinRequests: [
+      {
+        fullName: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: [120, 'Full name cannot be more than 120 characters']
+        },
+        email: {
+          type: String,
+          required: true,
+          trim: true,
+          lowercase: true,
+          maxlength: [150, 'Email cannot be more than 150 characters']
+        },
+        studentId: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: [30, 'Student ID cannot be more than 30 characters']
+        },
+        message: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: [1000, 'Message cannot exceed 1000 characters']
+        },
+        status: {
+          type: String,
+          enum: ['pending', 'approved', 'rejected'],
+          default: 'pending'
+        },
+        requestedAt: {
+          type: Date,
+          default: Date.now
+        },
+        reviewedAt: {
+          type: Date,
+          default: null
+        },
+        reviewedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Admin',
+          default: null
+        }
+      }
+    ],
     isPublic: {
       type: Boolean,
       default: true
@@ -128,11 +196,13 @@ SocietySchema.virtual('resourceCount').get(function() {
 SocietySchema.pre('save', function(next) {
   // Auto-generate slug from name
   if (this.isModified('name')) {
-    this.slug = this.name
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w ]+/g, '') // remove all non-word chars except space
-      .replace(/ +/g, '-');    // replace spaces with hyphen
+    const normalizedName = this.name.toLowerCase().trim();
+    const alphanumericWithSpaces = Array.from(normalizedName)
+      .filter((char) => /[a-z0-9 ]/.test(char))
+      .join('')
+      .trim();
+
+    this.slug = alphanumericWithSpaces.split(/\s+/).join('-');
   }
 
   // Sync memberCount with members.length
@@ -145,7 +215,7 @@ SocietySchema.pre('save', function(next) {
 
 // Instance Methods
 SocietySchema.methods.isMember = function(userId) {
-  return this.members.some(m => m.user.toString() === userId.toString());
+  return this.members.some((m) => m.user && m.user.toString() === userId.toString());
 };
 
 SocietySchema.methods.isLeader = function(userId) {
@@ -165,8 +235,7 @@ const SocietyJoiSchema = joi.object({
     'Social Impact', 'Sports', 'Science', 'Health & Wellness', 'Other'
   ).required(),
   tags: joi.array().items(joi.string().max(20)).max(5).default([]),
-  isPublic: joi.boolean().default(true),
-  leader: joi.string().regex(/^[0-9a-fA-F]{24}$/).required() // Must be valid ObjectId
+  isPublic: joi.boolean().default(true)
 });
 
 module.exports = { Society, SocietyJoiSchema };

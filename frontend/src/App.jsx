@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
 import EventsPage from './Pages/EventsPage';
@@ -20,10 +21,14 @@ function AppLayout() {
   const location = useLocation();
   const isAdminRoute =
     location.pathname.startsWith('/admin/') || location.pathname === '/admin-lost-found';
+  const isSocietyLeaderRoute =
+    location.pathname === '/societies/create' ||
+    (location.pathname.startsWith('/societies/') &&
+      (location.pathname.endsWith('/edit') || location.pathname.endsWith('/members')));
 
   return (
     <div className="flex flex-col min-h-screen bg-light">
-      {!isAdminRoute && <Header />}
+      {!isAdminRoute && !isSocietyLeaderRoute && <Header />}
 
       <main className="flex-grow">
         <Routes>
@@ -51,14 +56,15 @@ function AppLayout() {
             }
           />
           <Route path="/societies" element={<SocietiesPage />} />
-          <Route path="/societies/:id" element={<SocietyDetailPage />} />
+          <Route path="/societies/:slug" element={<SocietyDetailPage />} />
           <Route path="/societies/create" element={<CreateSocietyPage />} />
-          <Route path="/societies/:id/edit" element={<EditSocietyPage />} />
-          <Route path="/societies/:id/members" element={<MemberManagementPage />} />
+          <Route path="/societies/:slug/edit" element={<EditSocietyPage />} />
+          <Route path="/societies/:slug/members" element={<MemberManagementPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isSocietyLeaderRoute && <Footer />}
     </div>
   );
 }
@@ -67,6 +73,23 @@ function App() {
   return (
     <Router>
       <AppLayout />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3200,
+          style: {
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #dbeafe',
+          },
+          success: {
+            iconTheme: {
+              primary: '#2563eb',
+              secondary: '#ffffff',
+            },
+          },
+        }}
+      />
     </Router>
   );
 }

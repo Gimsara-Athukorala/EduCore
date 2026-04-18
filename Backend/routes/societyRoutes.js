@@ -9,7 +9,10 @@ const {
   uploadResource,
   deleteResource,
   removeMember,
-  updateMemberRole
+  updateMemberRole,
+  createJoinRequest,
+  getJoinRequests,
+  reviewJoinRequest
 } = require('../controllers/societyController');
 const { SocietyJoiSchema } = require('../Model/Society');
 const { requireAdminAuth } = require('../middleware/authMiddleware');
@@ -79,6 +82,21 @@ router.post('/:id/join', requireAdminAuth, writeLimiter, joinSociety);
 // Auth required: Yes
 // Roles allowed: student, society_leader
 router.post('/:id/leave', requireAdminAuth, writeLimiter, leaveSociety);
+
+// POST /api/v1/societies/:slug/join-requests
+// Description: Submit join request for society
+// Auth required: No
+router.post('/:slug/join-requests', writeLimiter, createJoinRequest);
+
+// GET /api/v1/societies/:slug/join-requests
+// Description: List join requests for admin/leader
+// Auth required: Yes
+router.get('/:slug/join-requests', requireAdminAuth, readLimiter, getJoinRequests);
+
+// PATCH /api/v1/societies/:slug/join-requests/:requestId
+// Description: Approve/reject join request
+// Auth required: Yes
+router.patch('/:slug/join-requests/:requestId', requireAdminAuth, writeLimiter, reviewJoinRequest);
 
 // POST /api/v1/societies/:id/resources
 // Description: Upload resource to society

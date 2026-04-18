@@ -1,9 +1,21 @@
 const { Society, SocietyJoiSchema } = require('../Model/Society');
 const Admin = require('../Model/Admin');
 const asyncHandler = require('../middleware/asyncHandler');
-const fs = require('fs').promises;
-const path = require('path');
+const fs = require('node:fs').promises;
+const path = require('node:path');
 const joi = require('joi');
+
+const joinRequestCreateSchema = joi.object({
+  fullName: joi.string().trim().min(3).max(120).required(),
+  email: joi.string().trim().email().max(150).required(),
+  studentId: joi.string().trim().min(3).max(30).required(),
+  message: joi.string().trim().min(20).max(1000).required(),
+});
+
+const joinRequestReviewSchema = joi.object({
+  action: joi.string().valid('approve', 'reject').required(),
+  note: joi.string().trim().max(500).allow('').optional(),
+});
 
 /**
  * @desc Create a new university society
@@ -62,9 +74,9 @@ exports.getAllSocieties = asyncHandler(async (req, res, next) => {
   }
 
   // Execute query with pagination (never return members array)
-  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const skip = (Number.parseInt(page, 10) - 1) * Number.parseInt(limit, 10);
   const societies = await Society.find(query)
-    .select('-members') // Exclude members for performance
+    .select('-members -joinRequests') // Exclude private arrays for performance and privacy
     .skip(skip)
     .limit(limit)
     .sort(search ? { score: { $meta: "textScore" } } : { createdAt: -1 });
@@ -76,7 +88,7 @@ exports.getAllSocieties = asyncHandler(async (req, res, next) => {
     data: {
       societies,
       total,
-      page: parseInt(page),
+      page: Number.parseInt(page, 10),
       totalPages: Math.ceil(total / limit)
     }
   });
@@ -109,6 +121,11 @@ exports.getSocietyBySlug = asyncHandler(async (req, res, next) => {
     delete result.members;
   }
 
+  // Join request data is private to admin/leader.
+  if (!isLeader && req.admin?.role !== 'admin') {
+    delete result.joinRequests;
+  }
+
   res.status(200).json({
     success: true,
     data: result
@@ -124,7 +141,7 @@ exports.getSocietyBySlug = asyncHandler(async (req, res, next) => {
 exports.joinSociety = asyncHandler(async (req, res, next) => {
   const society = await Society.findById(req.params.id);
 
-  if (!society || !society.isActive) {
+  if (!society?.isActive) {
     res.status(404);
     throw new Error('Society not found');
   }
@@ -137,7 +154,14 @@ exports.joinSociety = asyncHandler(async (req, res, next) => {
 
   // Atomic update to add member and increment count
   await Society.findByIdAndUpdate(req.params.id, {
-    $addToSet: { members: { user: req.admin.id, role: 'member' } },
+    $addToSet: {
+      members: {
+        user: req.admin.id,
+        role: 'member',
+        source: 'account',
+        email: req.admin.email,
+      },
+    },
     $inc: { memberCount: 1 }
   });
 
@@ -281,12 +305,19 @@ exports.uploadResource = asyncHandler(async (req, res, next) => {
     throw new Error('Please upload a file');
   }
 
+  let fileType = 'other';
+  if (req.file.mimetype.includes('image')) {
+    fileType = 'image';
+  } else if (req.file.mimetype.includes('video')) {
+    fileType = 'video';
+  } else if (req.file.mimetype.includes('pdf')) {
+    fileType = 'pdf';
+  }
+
   const resource = {
     filename: req.file.filename,
     originalName: req.file.originalname,
-    fileType: req.file.mimetype.includes('image') ? 'image' : 
-              req.file.mimetype.includes('video') ? 'video' : 
-              req.file.mimetype.includes('pdf') ? 'pdf' : 'other',
+    fileType,
     size: req.file.size,
     url: `/uploads/societies/${req.file.filename}`,
     uploadedBy: req.admin.id,
@@ -373,7 +404,7 @@ exports.removeMember = asyncHandler(async (req, res, next) => {
   }
 
   // Remove from array
-  society.members = society.members.filter(m => m.user.toString() !== userId);
+  society.members = society.members.filter((m) => !m.user || m.user.toString() !== userId);
   society.memberCount = society.members.length;
   await society.save();
 
@@ -411,7 +442,7 @@ exports.updateMemberRole = asyncHandler(async (req, res, next) => {
   }
 
   // Find member index
-  const memberIndex = society.members.findIndex(m => m.user.toString() === userId);
+  const memberIndex = society.members.findIndex((m) => m.user && m.user.toString() === userId);
   if (memberIndex === -1) {
     res.status(404);
     throw new Error('Member not found in this society');
@@ -424,5 +455,158 @@ exports.updateMemberRole = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `Member promoted to ${role}`
+  });
+});
+
+/**
+ * @desc Create society join request
+ * @route POST /api/v1/societies/:slug/join-requests
+ * @access Public
+ */
+exports.createJoinRequest = asyncHandler(async (req, res, next) => {
+  const { error, value } = joinRequestCreateSchema.validate(req.body);
+  if (error) {
+    res.status(400);
+    throw error;
+  }
+
+  const society = await Society.findOne({ slug: req.params.slug, isActive: true });
+  if (!society) {
+    res.status(404);
+    throw new Error('Society not found');
+  }
+
+  const normalizedEmail = value.email.toLowerCase().trim();
+  const normalizedStudentId = value.studentId.trim();
+
+  const alreadyPending = society.joinRequests.some(
+    (r) => r.status === 'pending' && (r.email === normalizedEmail || r.studentId === normalizedStudentId)
+  );
+  if (alreadyPending) {
+    res.status(409);
+    throw new Error('A pending request already exists for this email or student ID');
+  }
+
+  const alreadyMember = society.members.some(
+    (m) => (m.email && m.email === normalizedEmail) || (m.studentId && m.studentId === normalizedStudentId)
+  );
+  if (alreadyMember) {
+    res.status(409);
+    throw new Error('This student is already enrolled in this society');
+  }
+
+  society.joinRequests.push({
+    fullName: value.fullName,
+    email: normalizedEmail,
+    studentId: normalizedStudentId,
+    message: value.message,
+    status: 'pending',
+    requestedAt: new Date(),
+  });
+
+  await society.save();
+
+  res.status(201).json({
+    success: true,
+    message: 'Join request submitted successfully. Please wait for admin approval.',
+  });
+});
+
+/**
+ * @desc Get join requests for a society
+ * @route GET /api/v1/societies/:slug/join-requests
+ * @access Private (Admin, Leader)
+ */
+exports.getJoinRequests = asyncHandler(async (req, res, next) => {
+  const society = await Society.findOne({ slug: req.params.slug, isActive: true });
+  if (!society) {
+    res.status(404);
+    throw new Error('Society not found');
+  }
+
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
+    res.status(403);
+    throw new Error('Not authorized to view join requests');
+  }
+
+  const requests = [...society.joinRequests].sort((a, b) => {
+    if (a.status !== b.status) {
+      if (a.status === 'pending') return -1;
+      if (b.status === 'pending') return 1;
+    }
+    return new Date(b.requestedAt) - new Date(a.requestedAt);
+  });
+
+  res.status(200).json({
+    success: true,
+    data: requests,
+  });
+});
+
+/**
+ * @desc Approve or reject join request
+ * @route PATCH /api/v1/societies/:slug/join-requests/:requestId
+ * @access Private (Admin, Leader)
+ */
+exports.reviewJoinRequest = asyncHandler(async (req, res, next) => {
+  const { error, value } = joinRequestReviewSchema.validate(req.body);
+  if (error) {
+    res.status(400);
+    throw error;
+  }
+
+  const society = await Society.findOne({ slug: req.params.slug, isActive: true });
+  if (!society) {
+    res.status(404);
+    throw new Error('Society not found');
+  }
+
+  if (req.admin.role !== 'admin' && !society.isLeader(req.admin.id)) {
+    res.status(403);
+    throw new Error('Not authorized to review join requests');
+  }
+
+  const request = society.joinRequests.id(req.params.requestId);
+  if (!request) {
+    res.status(404);
+    throw new Error('Join request not found');
+  }
+
+  if (request.status !== 'pending') {
+    res.status(400);
+    throw new Error('This request has already been reviewed');
+  }
+
+  if (value.action === 'approve') {
+    const duplicateMember = society.members.some(
+      (m) => (m.email && m.email === request.email) || (m.studentId && m.studentId === request.studentId)
+    );
+    if (duplicateMember) {
+      res.status(409);
+      throw new Error('This requester is already enrolled');
+    }
+
+    society.members.push({
+      role: 'member',
+      source: 'join_request',
+      displayName: request.fullName,
+      email: request.email,
+      studentId: request.studentId,
+      joinedAt: new Date(),
+    });
+    society.memberCount = society.members.length;
+    request.status = 'approved';
+  } else {
+    request.status = 'rejected';
+  }
+
+  request.reviewedAt = new Date();
+  request.reviewedBy = req.admin.id;
+
+  await society.save();
+
+  res.status(200).json({
+    success: true,
+    message: value.action === 'approve' ? 'Join request approved and member enrolled' : 'Join request rejected',
   });
 });

@@ -32,9 +32,16 @@ function AdminLoginPage() {
     }
 
     try {
-      await loginAdmin(email, password);
+      const response = await loginAdmin(email, password);
+      const role = response?.data?.admin?.role;
+
       setShowSuccessToast(true);
-      window.setTimeout(() => {
+      setTimeout(() => {
+        if (role === 'society_leader') {
+          navigate('/societies/create');
+          return;
+        }
+
         navigate('/admin/lost-found');
       }, 900);
     } catch (loginError) {
@@ -68,10 +75,11 @@ function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="admin-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="admin-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -85,10 +93,11 @@ function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="admin-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
