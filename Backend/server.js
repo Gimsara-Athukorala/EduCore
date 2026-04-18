@@ -28,7 +28,12 @@ const connectDB = async () => {
 };
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Also increase URL-encoded limit
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -2,19 +2,19 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
-import EventsPage from './pages/EventsPage';
-import ContactUsPage from './pages/ContactUsPage';
+import EventsPage from './Pages/EventsPage';
+import ContactUsPage from './Pages/ContactUsPage';
 import LostFoundMainPage from './Components/Lost&Found/lost&foundMainpage';
 import FoundItemsPage from './Components/Lost&Found/FoundItemsPage';
 import ClaimItemPage from './Components/Lost&Found/claimItmes';
 import AdminLostFoundPage from './Components/Lost&Found/AdminLostFoundPage';
-import AdminLoginPage from './pages/AdminLoginPage';
+import AdminLoginPage from './Pages/AdminLoginPage';
 import AdminRouteGuard from './Components/Navigations/AdminRouteGuard';
-import SocietiesPage from './pages/SocietiesPage';
-import SocietyDetailPage from './pages/SocietyDetailPage';
-import CreateSocietyPage from './pages/CreateSocietyPage';
-import EditSocietyPage from './pages/EditSocietyPage';
-import MemberManagementPage from './pages/MemberManagementPage';
+import SocietiesPage from './Pages/SocietiesPage';
+import SocietyDetailPage from './Pages/SocietyDetailPage';
+import CreateSocietyPage from './Pages/CreateSocietyPage';
+import EditSocietyPage from './Pages/EditSocietyPage';
+import MemberManagementPage from './Pages/MemberManagementPage';
 
 function AppLayout() {
   const location = useLocation();
