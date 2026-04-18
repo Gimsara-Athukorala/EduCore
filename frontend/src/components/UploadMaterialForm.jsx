@@ -123,9 +123,8 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      // Create FormData to send files and text data together
       const formDataToSend = new FormData();
-      formDataToSend.append('module', module.code); // Save module code
+      formDataToSend.append('module', module.code);
       formDataToSend.append('title', formData.title);
       formDataToSend.append('materialType', formData.type);
       formDataToSend.append('uploadMethod', formData.uploadMethod);
@@ -137,11 +136,8 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
         formDataToSend.append('url', formData.fileUrl);
       }
 
-      // Send to our Node.js Backend
       const response = await fetch('http://localhost:5000/api/materials', {
         method: 'POST',
-        // Note: Do NOT set 'Content-Type' manually when using FormData, 
-        // the browser will automatically set it with the correct boundary
         body: formDataToSend
       });
 
@@ -172,58 +168,85 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-4 border-primary-800">
-        <div className="sticky top-0 bg-gradient-to-r from-primary-800 to-primary-700 text-white border-b-2 border-primary-600 p-6 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-bold flex items-center gap-3">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <Upload className="w-6 h-6" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/70 bg-white shadow-2xl shadow-slate-900/20">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-primary-700 bg-[linear-gradient(135deg,_#172554_0%,_#1e3a8a_100%)] p-6 text-white">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <div className="rounded-2xl bg-white/15 p-2">
+              <Upload className="h-6 w-6" />
             </div>
             Upload Study Material
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-primary-700 rounded-lg transition-colors"
+            className="rounded-xl p-2 transition-colors hover:bg-white/10"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <div className="bg-primary-50 border-2 border-primary-200 rounded-lg p-4 flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
+        <form onSubmit={handleSubmit} className="space-y-6 p-8">
+          <div className="flex items-start gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-4">
+            <Sparkles className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary-700" />
             <div className="flex-1">
-              <p className="text-sm text-primary-800 mb-2 font-medium">
+              <p className="mb-2 text-sm font-medium text-primary-800">
                 Save time during your presentation! Click the button below to instantly fill the form with realistic dummy data.
               </p>
               <button
                 type="button"
                 onClick={populateDummyData}
-                className="bg-primary-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-900 transition-colors text-sm"
+                className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-700"
               >
                 Populate Dummy Data
               </button>
             </div>
           </div>
 
+          <div className="grid gap-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Upload options
+              </p>
+              <h3 className="mt-2 text-xl font-bold text-slate-900">
+                Add a new resource to this module
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Choose whether you want to upload a local file or share an external resource link.
+              </p>
+            </div>
+
+            {module && (
+              <div className="rounded-[20px] border border-primary-200 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-600">
+                  Selected module
+                </p>
+                <p className="mt-3 text-lg font-bold text-slate-900">{module.code}</p>
+                <p className="mt-1 text-sm font-medium text-slate-600">{module.name}</p>
+                <p className="mt-3 text-sm text-slate-500">
+                  Year {module.year}, Semester {module.semester}
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="border-b border-primary-200 pb-4">
-            <label className="block text-sm font-medium text-primary-900 mb-3 font-semibold">
+            <label className="mb-3 block text-sm font-semibold text-primary-900">
               Upload Method <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <button
                 type="button"
                 onClick={() => {
                   setFormData({ ...formData, uploadMethod: 'file' });
                   setErrors({ ...errors, file: undefined, fileUrl: undefined });
                 }}
-                className={`p-4 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 font-medium ${
+                className={`flex items-center justify-center gap-2 rounded-2xl border-2 p-4 font-medium transition-colors ${
                   formData.uploadMethod === 'file'
-                    ? 'border-primary-800 bg-primary-50 text-primary-800'
-                    : 'border-primary-200 text-primary-600 hover:border-primary-400'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
+                    : 'border-primary-200 bg-white text-primary-600 hover:border-emerald-300 hover:bg-emerald-50/40'
                 }`}
               >
-                <FileIcon className="w-5 h-5" />
+                <FileIcon className="h-5 w-5" />
                 Upload File
               </button>
               <button
@@ -232,59 +255,42 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
                   setFormData({ ...formData, uploadMethod: 'url' });
                   setErrors({ ...errors, file: undefined, fileUrl: undefined });
                 }}
-                className={`p-4 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 font-medium ${
+                className={`flex items-center justify-center gap-2 rounded-2xl border-2 p-4 font-medium transition-colors ${
                   formData.uploadMethod === 'url'
-                    ? 'border-primary-800 bg-primary-50 text-primary-800'
-                    : 'border-primary-200 text-primary-600 hover:border-primary-400'
+                    ? 'border-violet-500 bg-violet-50 text-violet-800'
+                    : 'border-primary-200 bg-white text-primary-600 hover:border-violet-300 hover:bg-violet-50/40'
                 }`}
               >
-                <Link2 className="w-5 h-5" />
+                <Link2 className="h-5 w-5" />
                 Paste URL
               </button>
             </div>
           </div>
 
-          {module && (
-            <div>
-              <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
-                Module
-              </label>
-              <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary-800 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                  {module.code.slice(0, 2)}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-primary-900">{module.code} - {module.name}</p>
-                  <p className="text-sm text-primary-700">Year {module.year}, Semester {module.semester}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
           <div>
-            <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
+            <label className="mb-2 block text-sm font-semibold text-primary-900">
               Material Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+              className={`w-full rounded-2xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary-500 ${
                 errors.title ? 'border-red-500' : 'border-primary-200'
               }`}
               placeholder="E.g., Past Paper 2023 - Final Exam"
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+            {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
+            <label className="mb-2 block text-sm font-semibold text-primary-900">
               Material Type <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+              className={`w-full rounded-2xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary-500 ${
                 errors.type ? 'border-red-500' : 'border-primary-200'
               }`}
             >
@@ -293,12 +299,12 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
               <option value="short_note">Short Note</option>
               <option value="kuppi_video">Kuppi Video</option>
             </select>
-            {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
+            {errors.type && <p className="mt-1 text-sm text-red-500">{errors.type}</p>}
           </div>
 
           {formData.uploadMethod === 'file' ? (
             <div>
-              <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
+              <label className="mb-2 block text-sm font-semibold text-primary-900">
                 Select File <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col gap-3">
@@ -318,14 +324,14 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
                         ? 'video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska'
                         : 'application/pdf'
                     }
-                    className={`w-full px-4 py-3 border-2 border-dashed rounded-lg focus:outline-none transition-colors cursor-pointer ${
+                    className={`w-full cursor-pointer rounded-2xl border-2 border-dashed px-4 py-4 transition-colors focus:outline-none ${
                       errors.file ? 'border-red-500 bg-red-50' : 'border-primary-300 hover:border-primary-500'
                     }`}
                   />
                 </div>
                 {formData.file && (
-                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 flex items-start gap-3">
-                    <FileIcon className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-3 rounded-2xl border border-primary-200 bg-primary-50 p-3">
+                    <FileIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary-700" />
                     <div className="flex-1 text-sm">
                       <p className="font-medium text-primary-900">{formData.file.name}</p>
                       <p className="text-primary-700">
@@ -334,7 +340,7 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
                     </div>
                   </div>
                 )}
-                {errors.file && <p className="text-red-500 text-sm">{errors.file}</p>}
+                {errors.file && <p className="text-sm text-red-500">{errors.file}</p>}
                 <p className="text-xs text-primary-600">
                   {formData.type === 'kuppi_video'
                     ? 'Supported formats: MP4, WebM, MOV, AVI, MKV (Max 500MB)'
@@ -344,24 +350,24 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
+              <label className="mb-2 block text-sm font-semibold text-primary-900">
                 File URL / Link <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
                 value={formData.fileUrl}
                 onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                className={`w-full rounded-2xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary-500 ${
                   errors.fileUrl ? 'border-red-500' : 'border-primary-200'
                 }`}
                 placeholder={
                   formData.type === 'kuppi_video'
-                    ? '...'
+                    ? 'https://youtube.com/watch?v=...'
                     : 'https://example.com/file.pdf'
                 }
               />
-              {errors.fileUrl && <p className="text-red-500 text-sm mt-1">{errors.fileUrl}</p>}
-              <p className="text-xs text-primary-600 mt-1">
+              {errors.fileUrl && <p className="mt-1 text-sm text-red-500">{errors.fileUrl}</p>}
+              <p className="mt-1 text-xs text-primary-600">
                 {formData.type === 'kuppi_video'
                   ? 'Enter a valid video URL (YouTube, Vimeo, etc.)'
                   : 'Enter a direct link to the file'}
@@ -370,20 +376,20 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 mb-2 font-semibold">
+            <label className="mb-2 block text-sm font-semibold text-primary-900">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.description ? 'border-red-500' : 'border-gray-300'
+              className={`w-full rounded-2xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-primary-500 ${
+                errors.description ? 'border-red-500' : 'border-primary-200'
               }`}
               placeholder="Provide a brief description of the material..."
             />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-            <p className="text-xs text-gray-500 mt-1">
+            {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
+            <p className="mt-1 text-xs text-slate-500">
               Minimum 10 characters
             </p>
           </div>
@@ -392,16 +398,16 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-primary-800 text-white py-3 rounded-lg font-medium hover:bg-primary-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3 text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader className="w-5 h-5 animate-spin" />
+                  <Loader className="h-5 w-5 animate-spin" />
                   {formData.uploadMethod === 'file' ? 'Uploading File...' : 'Saving...'}
                 </>
               ) : (
                 <>
-                  <Upload className="w-5 h-5" />
+                  <Upload className="h-5 w-5" />
                   Upload Material
                 </>
               )}
@@ -409,7 +415,7 @@ export function UploadMaterialForm({ module, onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-primary-300 text-primary-700 rounded-lg font-medium hover:bg-primary-50 transition-colors"
+              className="rounded-2xl border border-amber-300 bg-amber-50 px-6 py-3 font-medium text-amber-800 transition-colors hover:bg-amber-100"
             >
               Cancel
             </button>
