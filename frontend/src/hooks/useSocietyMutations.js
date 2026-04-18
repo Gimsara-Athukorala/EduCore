@@ -7,6 +7,10 @@ export const useCreateSociety = () => {
 
   return useMutation({
     mutationFn: async (data) => {
+      console.log('[useSocietyMutations] Creating society with data:', data);
+      console.log('[useSocietyMutations] Axios baseURL:', axiosInstance.defaults.baseURL);
+      console.log('[useSocietyMutations] Full URL will be:', `${axiosInstance.defaults.baseURL}/societies`);
+      
       const response = await axiosInstance.post('/societies', data);
       return response.data.data;
     },
@@ -17,6 +21,13 @@ export const useCreateSociety = () => {
     onError: (error) => {
       console.error('[Society Creation Error]', error);
       console.error('[Error Response]', error.response?.data);
+      console.error('[Error Status]', error.response?.status);
+      console.error('[Error Config]', {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method,
+        headers: error.config?.headers
+      });
       
       const message = error.response?.data?.message || 'Failed to create society.';
       const validationErrors = error.response?.data?.errors;

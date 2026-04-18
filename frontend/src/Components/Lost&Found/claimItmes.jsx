@@ -69,6 +69,8 @@ function ClaimItemPage() {
 
   const validateClaimForm = () => {
     const newErrors = {};
+    const normalizedStudentId = claimFormData.claimantStudentId.trim().toUpperCase();
+    const normalizedProofNumber = claimFormData.idProofNumber.trim().toUpperCase();
     
     if (!claimFormData.claimantFullName.trim()) {
       newErrors.claimantFullName = "Full name is required";
@@ -100,10 +102,19 @@ function ClaimItemPage() {
     
     if (!claimFormData.idProofType) {
       newErrors.idProofType = "Please select ID proof type";
+    } else if (!["Student ID", "NIC"].includes(claimFormData.idProofType)) {
+      newErrors.idProofType = "ID proof type must be Student ID or NIC";
     }
     
     if (!claimFormData.idProofNumber.trim()) {
       newErrors.idProofNumber = "ID proof number is required";
+    } else if (claimFormData.idProofType === "Student ID" && normalizedProofNumber !== normalizedStudentId) {
+      newErrors.idProofNumber = "ID proof number must match your Student ID";
+    } else if (claimFormData.idProofType === "NIC") {
+      const nicPattern = /^(?:\d{9}[VvXx]|\d{12})$/;
+      if (!nicPattern.test(claimFormData.idProofNumber.trim())) {
+        newErrors.idProofNumber = "NIC must be 12 digits or 9 digits followed by V/X";
+      }
     }
     
     if (!claimFormData.agreedToTerms) {
@@ -156,7 +167,7 @@ function ClaimItemPage() {
     }
   };
 
-  const idProofTypes = ["Student ID Card", "National ID Card", "Driver's License", "Passport", "Other"];
+  const idProofTypes = ["Student ID", "NIC"];
 
   if (loading) {
     return (
@@ -438,7 +449,7 @@ function ClaimItemPage() {
                       </label>
                       <select 
                         value={claimFormData.idProofType}
-                        onChange={(e) => setClaimFormData({...claimFormData, idProofType: e.target.value})}
+                        onChange={(e) => setClaimFormData({ ...claimFormData, idProofType: e.target.value, idProofNumber: '' })}
                         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5A623]"
                       >
                         <option value="">Select ID Proof Type</option>
@@ -453,10 +464,19 @@ function ClaimItemPage() {
                       <input 
                         type="text" 
                         value={claimFormData.idProofNumber}
-                        onChange={(e) => setClaimFormData({...claimFormData, idProofNumber: e.target.value})}
+                        onChange={(e) => {
+                          let value = e.target.value;
+                          if (claimFormData.idProofType === 'Student ID') {
+                            value = value.toUpperCase();
+                          }
+                          setClaimFormData({ ...claimFormData, idProofNumber: value });
+                        }}
                         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5A623]" 
-                        placeholder="Enter your ID number"
+                        placeholder={claimFormData.idProofType === 'Student ID' ? 'Enter the same value as Student ID' : 'Enter your NIC'}
                       />
+                      {claimFormData.idProofType === 'Student ID' && (
+                        <p className="text-gray-400 text-xs mt-1">Must exactly match the Student ID entered above.</p>
+                      )}
                       {claimErrors.idProofNumber && <p className="text-red-500 text-xs mt-1">{claimErrors.idProofNumber}</p>}
                     </div>
                   </div>

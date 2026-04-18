@@ -11,7 +11,9 @@ const getBaseURL = () => {
     return normalized.replace(/\/api\/v1$/i, '/api');
   }
 
-  return 'http://localhost:5000/api';
+  const baseURL = 'http://localhost:5000/api';
+  console.log('[Axios] Base URL initialized to:', baseURL);
+  return baseURL;
 };
 
 const axiosInstance = axios.create({
