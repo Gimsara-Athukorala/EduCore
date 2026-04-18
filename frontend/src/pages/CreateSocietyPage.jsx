@@ -50,12 +50,8 @@ const CreateSocietyPage = () => {
       });
       setFormKey((prev) => prev + 1);
     } catch (error) {
-      setToastState({
-        isOpen: true,
-        message: error?.response?.data?.message || 'Failed to create society.',
-        variant: 'error',
-      });
-      throw error;
+      // Error is already handled by the hook's onError callback with detailed messages
+      console.error('Create society error:', error);
     }
   };
 
