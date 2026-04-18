@@ -1,57 +1,84 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { BookOpenCheck, FolderKanban, GraduationCap, Home, Search, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-function Header() {
+function Header({ onGoHome, onBrowseMaterials, isLandingPage = false }) {
   const navigate = useNavigate();
 
-  const handleEventClick = () => {
-    navigate('/events');
-    window.scrollTo(0, 0);
+  const handleGoHome = () => {
+    if (onGoHome) {
+      onGoHome();
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handleBrowseMaterials = () => {
+    if (onBrowseMaterials) {
+      onBrowseMaterials();
+    } else {
+      navigate('/resources');
+    }
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary-600 to-secondary shadow-md">
-      <div className="max-w-7xl mx-auto px-5">
-        <div className="flex justify-between items-center h-24">
-          {/* Brand */}
-          <div className="flex items-center gap-3 min-w-0">
-            <img
-              src="/assets/EduCore_Logo.png"
-              alt="EduCore Logo"
-              className="w-24 h-24 object-contain flex-shrink-0"
-              style={{ border: '2px solid rgba(255,255,255,0.8)' }}
-            />
-            <div className="flex flex-col gap-0">
-              <h1 className="text-xl font-bold text-white leading-tight">EduCore</h1>
-              <p className="text-xs font-medium opacity-85 uppercase tracking-wide">Learning Event Management</p>
-            </div>
+    <header className="sticky top-0 z-50 border-b border-[#0f1e4a] bg-[#172554] text-white shadow-lg shadow-slate-900/20">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <button
+          onClick={handleGoHome}
+          className="flex min-w-0 items-center gap-3 rounded-2xl text-left transition-colors hover:bg-white/5"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+            <GraduationCap className="h-6 w-6" />
           </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
+              Learning Management System
+            </p>
+            <h1 className="truncate text-lg font-bold text-white sm:text-xl">
+              Study Material Repository
+            </h1>
+          </div>
+        </button>
 
-          {/* Navigation */}
-          <nav className="flex gap-8 items-center flex-1 ml-10 hidden lg:flex">
-            <Link to="/" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Home</Link>
-            <button onClick={handleEventClick} className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Events</button>
-            <Link to="/lost-found" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Lost & Found</Link>
-            <Link to="/societies" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Societies</Link>
-            <a href="#about" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">About</a>
-            <a href="#help" className="text-white text-sm font-medium pb-2 border-b-2 border-transparent hover:opacity-80 transition-all duration-300">Help</a>
-          </nav>
+        <div className="hidden items-center gap-3 lg:flex">
+          <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85">
+            <span className="inline-flex items-center gap-2">
+              <FolderKanban className="h-4 w-4" />
+              Organized by year, semester, and module
+            </span>
+          </div>
+          <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85">
+            <span className="inline-flex items-center gap-2">
+              <BookOpenCheck className="h-4 w-4" />
+              Fast access to notes, papers, and videos
+            </span>
+          </div>
+        </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 items-center ml-auto">
-            <button className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="Search">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M12 12L17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+        <div className="flex items-center gap-3">
+          {!isLandingPage && (
+            <button
+              onClick={handleBrowseMaterials}
+              className="hidden items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/15 sm:inline-flex"
+            >
+              <Search className="h-4 w-4" />
+              Browse
             </button>
-            <Link to="/admin/lost-found" className="flex items-center justify-center w-10 h-10 bg-white/15 text-white rounded-lg hover:bg-white/25 transition-all" title="Admin Panel">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M3 17C3 13.5 6.2 11 10 11C13.8 11 17 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </Link>
-          </div>
+          )}
+          <button
+            onClick={() => navigate('/resources')}
+            className="hidden items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/15 sm:inline-flex"
+          >
+            <BookOpen className="h-4 w-4" />
+            Resources
+          </button>
+          <button
+            onClick={handleGoHome}
+            className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/15"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </button>
         </div>
       </div>
     </header>

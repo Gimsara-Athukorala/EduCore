@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowLeft } from 'lucide-react';
-import { loginAdmin } from '../utils/adminAuth';
+import { getAdminRole, getAdminToken, loginAdmin } from '../utils/adminAuth';
 import Toast from '../common/toast.jsx';
 import { validateAdminLogin } from '../validator/loginValidator.js';
 
@@ -13,6 +13,23 @@ function AdminLoginPage() {
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+  const getDashboardPath = (role) => {
+    if (role === 'society_leader') {
+      return '/societies/create';
+    }
+
+    return '/admin/lost-found';
+  };
+
+  useEffect(() => {
+    const token = getAdminToken();
+    if (!token) {
+      return;
+    }
+
+    navigate(getDashboardPath(getAdminRole()), { replace: true });
+  }, [navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,17 +50,10 @@ function AdminLoginPage() {
 
     try {
       const response = await loginAdmin(email, password);
-      const role = response?.data?.admin?.role;
+      const role = response?.user?.role;
 
       setShowSuccessToast(true);
-      setTimeout(() => {
-        if (role === 'society_leader') {
-          navigate('/societies/create');
-          return;
-        }
-
-        navigate('/admin/lost-found');
-      }, 900);
+      navigate(getDashboardPath(role), { replace: true });
     } catch (loginError) {
       setError(loginError.message || 'Unable to login');
     } finally {
