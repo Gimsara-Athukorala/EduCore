@@ -1,6 +1,11 @@
 const Claim = require('../Model/Claim');
 const FoundItem = require('../Model/FoundItem');
-const { sendClaimApprovalEmail } = require('../utils/claimPickupMailer');
+const { sendClaimApprovedEmail } = require('../utils/emailService');
+
+const generatePickupCode = (claimId) => {
+  const randomPart = Math.floor(1000 + Math.random() * 9000);
+  return `PICKUP-${claimId.toString().slice(-6).toUpperCase()}-${randomPart}`;
+};
 
 // @desc    Create a new claim
 // @route   POST /api/claims
@@ -272,6 +277,7 @@ const updateClaimStatus = async (req, res) => {
     
     // Get the found item
     const foundItem = await FoundItem.findById(claim.itemId);
+    const oldStatus = claim.status;
     
     // Update claim status
     claim.status = status;
@@ -280,6 +286,7 @@ const updateClaimStatus = async (req, res) => {
     if (status === 'approved') {
       claim.verifiedBy = 'admin';
       claim.verifiedAt = new Date();
+      claim.pickupCode = claim.pickupCode || generatePickupCode(claim._id);
       
       // Update found item status to claimed (already claimed when claim was created)
       if (foundItem) {
@@ -289,27 +296,7 @@ const updateClaimStatus = async (req, res) => {
         await foundItem.save();
       }
 
-      // Send claim pickup approval email to the claimant
-      const emailResult = await sendClaimApprovalEmail(claim, foundItem);
-      console.log('Claim approval email attempt', {
-        claimId: claim._id.toString(),
-        claimantEmail: claim.claimantEmail,
-        result: emailResult
-      });
-
-      if (!emailResult.sent) {
-        console.error('Claim approval email failed for claim:', claim._id, emailResult);
-      }
-
-      claim.pickupCode = emailResult.pickupCode || claim.pickupCode;
-      if (emailResult.sent) {
-        claim.pickupEmailSentAt = new Date();
-        claim.pickupEmailSentStatus = 'sent';
-        claim.pickupEmailError = null;
-      } else {
-        claim.pickupEmailSentStatus = 'failed';
-        claim.pickupEmailError = emailResult.error || emailResult.reason || 'Email not sent';
-      }
+      claim.pickupCode = claim.pickupCode || generatePickupCode(claim._id);
     } else if (status === 'rejected') {
       claim.rejectionReason = rejectionReason || 'No reason provided';
       
@@ -332,11 +319,44 @@ const updateClaimStatus = async (req, res) => {
     }
     
     await claim.save();
+
+    let emailNotification = {
+      attempted: false,
+      sent: false,
+      skipped: false,
+      reason: null,
+      recipient: claim.claimantEmail || null,
+    };
+
+    if (status === 'approved' && oldStatus !== 'approved') {
+      emailNotification.attempted = true;
+      try {
+        const emailResult = await sendClaimApprovedEmail({
+          to: claim.claimantEmail,
+          claimantName: claim.claimantFullName,
+          itemName: claim.itemName,
+          pickupCode: claim.pickupCode,
+        });
+
+        if (emailResult?.skipped) {
+          emailNotification.skipped = true;
+          emailNotification.reason = emailResult.reason || 'Email send skipped';
+        } else {
+          emailNotification.sent = true;
+        }
+      } catch (emailError) {
+        emailNotification.reason = emailError.message;
+        console.error('Error sending approval email:', emailError);
+      }
+    } else if (status === 'approved' && oldStatus === 'approved') {
+      emailNotification.reason = 'Claim was already approved previously';
+    }
     
     res.status(200).json({
       success: true,
       data: claim,
-      message: `Claim ${status} successfully`
+      message: `Claim ${status} successfully`,
+      emailNotification,
     });
   } catch (error) {
     console.error('Error updating claim status:', error);

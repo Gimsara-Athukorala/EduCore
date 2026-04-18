@@ -1,6 +1,9 @@
 import { useAuthStore } from '../store/authStore';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000')
+  .replace(/\/+$/, '')
+  .replace(/\/api\/v1$/i, '')
+  .replace(/\/api$/i, '');
 const ADMIN_TOKEN_KEY = 'adminToken';
 const ADMIN_ROLE_KEY = 'adminRole';
 
@@ -30,7 +33,7 @@ export const isAdminAuthenticated = () => {
 };
 
 export const loginAdmin = async (email, password) => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/api/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -38,25 +41,31 @@ export const loginAdmin = async (email, password) => {
     body: JSON.stringify({ email, password }),
   });
 
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('Login endpoint returned non-JSON response. Check API URL and route configuration.');
+  }
+
   const data = await response.json();
 
-  if (!response.ok || !data.success) {
+  if (!response.ok || !data.token || !data.user) {
     throw new Error(data.message || 'Login failed');
   }
 
-  const role = data?.data?.admin?.role;
-  const admin = data?.data?.admin;
+  const role = data?.user?.role || 'admin';
+  const admin = data?.user;
 
-  setAdminToken(data.data.token);
+  setAdminToken(data.token);
   setAdminRole(role || 'admin');
 
   useAuthStore.getState().setAuth(
     {
-      _id: admin?.id,
+      _id: admin?.id || admin?._id,
       email: admin?.email,
       role: admin?.role || 'admin',
+      fullName: admin?.fullName,
     },
-    data.data.token
+    data.token
   );
 
   return data;

@@ -1,88 +1,41 @@
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
-const path = require('path');
-require('dotenv').config();
+const cors = require('cors');
+const path = require('node:path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/EduCore';
-const PORT = process.env.PORT || 5000;
-
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET is required in environment variables');
-}
-
-// MongoDB Connection
-const connectDB = async () => {
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    console.log('✅ Connected to MongoDB successfully');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
-    process.exit(1);
-  }
-};
-
-// Middleware
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.use(express.json({ limit: '10mb' })); // Increased limit for image uploads
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Also increase URL-encoded limit
+app.use(cors());
+app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
+// Routes Integration
+const authRoutes = require('./Routes/authRoutes');
+const materialRoutes = require('./Routes/materialRoutes');
+const societyRoutes = require('./Routes/societyRoutes');
 const eventRoutes = require('./Routes/eventRoutes');
 const lostItemRoutes = require('./Routes/lostItemRoutes');
 const foundItemRoutes = require('./Routes/foundItemRoutes');
 const claimRoutes = require('./Routes/claimRoutes');
-const adminRoutes = require('./Routes/adminRouteslostFound');
-const authRoutes = require('./Routes/authRoutes');
-const societyRoutes = require('./Routes/societyRoutes');
+const adminRoutesLostFound = require('./Routes/adminRouteslostFound');
 
-app.use('/api/events', eventRoutes);
-app.use('/api/lost-items', lostItemRoutes);
-app.use('/api/found-items', foundItemRoutes);
-app.use('/api/claims', claimRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/v1/societies', societyRoutes);
+// Mount routes with appropriate paths
+app.use('/api', authRoutes); // This makes /api/login, /api/register
+app.use('/api/materials', materialRoutes); // This makes /api/materials/
+app.use('/api/societies', societyRoutes); // This makes /api/societies/
+app.use('/api/events', eventRoutes); // This makes /api/events/
+app.use('/api/lost-items', lostItemRoutes); // This makes /api/lost-items/
+app.use('/api/found-items', foundItemRoutes); // This makes /api/found-items/
+app.use('/api/claims', claimRoutes); // This makes /api/claims/
+app.use('/api/admin/lost-found', adminRoutesLostFound); // This makes /api/admin/lost-found/
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'EduCore LMS API is running',
-    database: 'MongoDB Connected',
-    version: '1.0.0'
-  });
-});
+// Error Handler Middleware (must be last)
+const { errorHandler } = require('./middleware/errorHandler');
+app.use(errorHandler);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal server error', error: err.message });
-});
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch(err => console.log(err));
 
-// Start server
-const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`\n🚀 Server running on port ${PORT}`);
-    console.log(`📊 Database: MongoDB Connected`);
-    console.log(`🎯 API: http://localhost:${PORT}`);
-    console.log(`📝 Ready to handle event management operations\n`);
-  });
-};
-
-if (require.main === module) {
-  startServer();
-}
-
-module.exports = app;
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));

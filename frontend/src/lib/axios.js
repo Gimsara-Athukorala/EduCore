@@ -2,12 +2,16 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+const stripTrailingSlash = (value) => value.replace(/\/+$/, '');
+
 const getBaseURL = () => {
-  const envBaseUrl = globalThis?.process?.env?.REACT_APP_API_URL;
+  const envBaseUrl = globalThis?.process?.env?.REACT_APP_API_URL?.trim();
   if (envBaseUrl) {
-    return envBaseUrl;
+    const normalized = stripTrailingSlash(envBaseUrl);
+    return normalized.replace(/\/api\/v1$/i, '/api');
   }
-  return 'http://localhost:5000/api/v1';
+
+  return 'http://localhost:5000/api';
 };
 
 const axiosInstance = axios.create({
@@ -18,6 +22,11 @@ const axiosInstance = axios.create({
 // Request Interceptor: Attach access token
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Keep legacy call sites like '/api/events' working with '/api' baseURL.
+    if (typeof config.url === 'string' && config.url.startsWith('/api/')) {
+      config.url = config.url.slice(4);
+    }
+
     const { accessToken } = useAuthStore.getState();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;

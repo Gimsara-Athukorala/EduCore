@@ -3,6 +3,12 @@ const FoundItem = require('../Model/FoundItem');
 const Claim = require('../Model/Claim');
 const fs = require('fs').promises;
 const path = require('path');
+const { sendClaimApprovedEmail } = require('../utils/emailService');
+
+const generatePickupCode = (claimId) => {
+  const randomPart = Math.floor(1000 + Math.random() * 9000);
+  return `PICKUP-${claimId.toString().slice(-6).toUpperCase()}-${randomPart}`;
+};
 
 // Helper function to delete image file
 const deleteImageFile = async (imagePath) => {
@@ -245,12 +251,14 @@ const updateClaimStatus = async (req, res) => {
     const foundItem = await FoundItem.findById(claim.itemId);
     
     // Update claim status
+    const oldStatus = claim.status;
     claim.status = status;
     claim.adminNotes = adminNotes || claim.adminNotes;
     
     if (status === 'approved') {
       claim.verifiedBy = 'admin';
       claim.verifiedAt = new Date();
+      claim.pickupCode = claim.pickupCode || generatePickupCode(claim._id);
       
       // Update found item status to claimed if not already
       if (foundItem && foundItem.status === 'approved') {
@@ -281,11 +289,44 @@ const updateClaimStatus = async (req, res) => {
     }
     
     await claim.save();
+
+    let emailNotification = {
+      attempted: false,
+      sent: false,
+      skipped: false,
+      reason: null,
+      recipient: claim.claimantEmail || null,
+    };
+
+    if (status === 'approved' && oldStatus !== 'approved') {
+      emailNotification.attempted = true;
+      try {
+        const emailResult = await sendClaimApprovedEmail({
+          to: claim.claimantEmail,
+          claimantName: claim.claimantFullName,
+          itemName: claim.itemName,
+          pickupCode: claim.pickupCode,
+        });
+
+        if (emailResult && emailResult.skipped) {
+          emailNotification.skipped = true;
+          emailNotification.reason = emailResult.reason || 'Email send skipped';
+        } else {
+          emailNotification.sent = true;
+        }
+      } catch (emailError) {
+        emailNotification.reason = emailError.message;
+        console.error('Error sending approval email:', emailError);
+      }
+    } else if (status === 'approved' && oldStatus === 'approved') {
+      emailNotification.reason = 'Claim was already approved previously';
+    }
     
     res.status(200).json({
       success: true,
       data: claim,
-      message: `Claim ${status} successfully`
+      message: `Claim ${status} successfully`,
+      emailNotification,
     });
   } catch (error) {
     console.error('Error updating claim status:', error);
@@ -608,12 +649,14 @@ const bulkUpdateClaims = async (req, res) => {
       const claim = await Claim.findById(claimId);
       if (claim) {
         const foundItem = await FoundItem.findById(claim.itemId);
+        const oldStatus = claim.status;
         
         claim.status = status;
         
         if (status === 'approved') {
           claim.verifiedBy = 'admin';
           claim.verifiedAt = new Date();
+          claim.pickupCode = claim.pickupCode || generatePickupCode(claim._id);
           
           if (foundItem && foundItem.status === 'approved') {
             foundItem.status = 'claimed';
@@ -633,6 +676,20 @@ const bulkUpdateClaims = async (req, res) => {
         }
         
         await claim.save();
+
+        if (status === 'approved' && oldStatus !== 'approved') {
+          try {
+            await sendClaimApprovedEmail({
+              to: claim.claimantEmail,
+              claimantName: claim.claimantFullName,
+              itemName: claim.itemName,
+              pickupCode: claim.pickupCode,
+            });
+          } catch (emailError) {
+            console.error('Error sending bulk approval email:', emailError);
+          }
+        }
+
         results.push({ id: claimId, status: 'success' });
       } else {
         results.push({ id: claimId, status: 'failed', reason: 'Claim not found' });

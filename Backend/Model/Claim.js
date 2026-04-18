@@ -106,21 +106,8 @@ const claimSchema = new mongoose.Schema({
     default: null
   },
   
-  // Pickup email metadata
+  // Pickup metadata
   pickupCode: {
-    type: String,
-    default: null
-  },
-  pickupEmailSentAt: {
-    type: Date,
-    default: null
-  },
-  pickupEmailSentStatus: {
-    type: String,
-    enum: ['pending', 'sent', 'failed'],
-    default: 'pending'
-  },
-  pickupEmailError: {
     type: String,
     default: null
   },

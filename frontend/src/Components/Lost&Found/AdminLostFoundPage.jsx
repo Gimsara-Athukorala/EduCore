@@ -124,9 +124,34 @@ function AdminLostFoundPage() {
     navigate('/admin/login');
   };
 
+  const getClaimApprovalAlertMessage = (responseData) => {
+    const info = responseData?.emailNotification;
+    if (!info) {
+      return 'Claim approved successfully';
+    }
+
+    if (info.sent) {
+      return `Claim approved and email sent to ${info.recipient}`;
+    }
+
+    if (info.skipped) {
+      return `Claim approved, but email was skipped (${info.reason || 'unknown reason'})`;
+    }
+
+    if (info.attempted && !info.sent) {
+      return `Claim approved, but email failed (${info.reason || 'unknown error'})`;
+    }
+
+    if (info.reason) {
+      return `Claim approved (${info.reason})`;
+    }
+
+    return 'Claim approved successfully';
+  };
+
   const fetchStats = async () => {
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/stats`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/stats`);
       const data = await response.json();
       if (data.success) {
         setStats(data.data);
@@ -138,7 +163,7 @@ function AdminLostFoundPage() {
 
   const fetchPendingItems = async () => {
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/pending`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/pending`);
       const data = await response.json();
       if (data.success) {
         setPendingItems(data.data);
@@ -150,7 +175,7 @@ function AdminLostFoundPage() {
 
   const fetchAcceptedItems = async () => {
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/accepted`);
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/accepted`);
       const data = await response.json();
       if (data.success) {
         setAcceptedItems(data.data);
@@ -178,11 +203,11 @@ function AdminLostFoundPage() {
       };
 
       if (selectedItem.type === 'lost') {
-        endpoint = `${API_BASE_URL}/api/admin/lost/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/lost/${selectedItem._id}`;
       } else if (selectedItem.type === 'found') {
-        endpoint = `${API_BASE_URL}/api/admin/found/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/found/${selectedItem._id}`;
       } else if (selectedItem.type === 'claim') {
-        endpoint = `${API_BASE_URL}/api/admin/claim/${selectedItem._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/claim/${selectedItem._id}`;
         body.status = reviewAction === 'accept' ? 'approved' : 'rejected';
         if (reviewAction === 'reject') {
           body.rejectionReason = reviewComment;
@@ -201,7 +226,11 @@ function AdminLostFoundPage() {
         await fetchPendingItems();
         await fetchAcceptedItems();
         await fetchStats();
-        alert(reviewAction === 'accept' ? 'Item approved successfully' : 'Item rejected successfully');
+        if (selectedItem.type === 'claim' && reviewAction === 'accept') {
+          alert(getClaimApprovalAlertMessage(data));
+        } else {
+          alert(reviewAction === 'accept' ? 'Item approved successfully' : 'Item rejected successfully');
+        }
       } else {
         alert(data.message || 'Error processing review');
       }
@@ -222,11 +251,11 @@ function AdminLostFoundPage() {
     try {
       let endpoint = '';
       if (type === 'lost') {
-        endpoint = `${API_BASE_URL}/api/admin/lost/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/lost/${item._id}`;
       } else if (type === 'found') {
-        endpoint = `${API_BASE_URL}/api/admin/found/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/found/${item._id}`;
       } else if (type === 'claim') {
-        endpoint = `${API_BASE_URL}/api/admin/claim/${item._id}`;
+        endpoint = `${API_BASE_URL}/api/admin/lost-found/claim/${item._id}`;
       }
 
       const response = await adminFetch(endpoint, {
@@ -256,7 +285,7 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/found/${item._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/found/${item._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -290,7 +319,7 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/claim/${claim._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/claim/${claim._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -304,7 +333,7 @@ function AdminLostFoundPage() {
         await fetchPendingItems();
         await fetchAcceptedItems();
         await fetchStats();
-        alert('Claim approved successfully');
+        alert(getClaimApprovalAlertMessage(data));
       } else {
         alert(data.message || 'Error approving claim');
       }
@@ -323,7 +352,7 @@ function AdminLostFoundPage() {
     setIsProcessing(true);
     
     try {
-      const response = await adminFetch(`${API_BASE_URL}/api/admin/claim/${claim._id}`, {
+      const response = await adminFetch(`${API_BASE_URL}/api/admin/lost-found/claim/${claim._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
