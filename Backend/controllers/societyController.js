@@ -77,6 +77,7 @@ exports.getAllSocieties = asyncHandler(async (req, res, next) => {
   const skip = (Number.parseInt(page, 10) - 1) * Number.parseInt(limit, 10);
   const societies = await Society.find(query)
     .select('-members -joinRequests') // Exclude private arrays for performance and privacy
+    .populate('leader', '_id email')
     .skip(skip)
     .limit(limit)
     .sort(search ? { score: { $meta: "textScore" } } : { createdAt: -1 });

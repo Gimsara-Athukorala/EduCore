@@ -24,13 +24,19 @@ const CreateSocietyPage = () => {
   );
   const { data: societiesData, isLoading: isSocietiesLoading } = useGetSocieties(listingFilters);
 
-  const leaderSocieties = useMemo(() => {
+  const visibleSocieties = useMemo(() => {
     const societies = societiesData?.societies || [];
+    const currentUserId = user?._id || user?.id;
+
+    if (user?.role === 'admin') {
+      return societies;
+    }
+
     return societies.filter((society) => {
-      const leaderId = society?.leader?._id || society?.leader;
-      return leaderId && user?._id && String(leaderId) === String(user._id);
+      const leaderId = society?.leader?._id || society?.leader?.id || society?.leader;
+      return leaderId && currentUserId && String(leaderId) === String(currentUserId);
     });
-  }, [societiesData, user?._id]);
+  }, [societiesData, user?._id, user?.id, user?.role]);
 
   useEffect(() => {
     document.title = 'Create Society | UniConnect';
@@ -59,16 +65,16 @@ const CreateSocietyPage = () => {
 
   if (isSocietiesLoading) {
     joinRequestsContent = <p className="text-sm text-muted mt-4">Loading your societies...</p>;
-  } else if (leaderSocieties.length === 0) {
+  } else if (visibleSocieties.length === 0) {
     joinRequestsContent = (
       <div className="mt-4 rounded-xl border border-dashed border-blue-200 bg-blue-50/60 p-4 text-sm text-blue-800">
-        No societies found under your leadership yet. Create one above, then requests will appear in this section.
+        No societies found yet. Create one above, then requests will appear in this section.
       </div>
     );
   } else {
     joinRequestsContent = (
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        {leaderSocieties.map((society) => (
+        {visibleSocieties.map((society) => (
           <Link
             key={society._id}
             to={`/societies/${society.slug}/members?tab=requests`}

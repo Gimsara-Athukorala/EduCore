@@ -18,6 +18,42 @@ exports.register = async (req, res) => {
     }
 };
 
+exports.registerSocietyLeader = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+
+        if (!normalizedEmail || !password) {
+            return res.status(400).json({ message: 'Email and password are required.' });
+        }
+
+        const existingAdmin = await Admin.findOne({ email: normalizedEmail });
+        if (existingAdmin) {
+            return res.status(400).json({ message: 'Society leader email already registered.' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+        const societyLeader = await Admin.create({
+            email: normalizedEmail,
+            passwordHash,
+            role: 'society_leader',
+            status: 'active',
+        });
+
+        return res.status(201).json({
+            message: 'Society leader account created successfully',
+            user: {
+                id: societyLeader._id,
+                email: societyLeader.email,
+                role: societyLeader.role,
+                status: societyLeader.status,
+            },
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;

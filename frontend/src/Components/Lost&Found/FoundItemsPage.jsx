@@ -34,7 +34,7 @@ import {
   Shield
 } from 'lucide-react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -307,10 +307,13 @@ function FoundItemsPage() {
                 <Upload className="w-4 h-4" />
                 Report Found Item
               </button>
-              <a href="/lost-items" className="bg-[#FFFFFF] px-5 py-2 rounded-full text-[#1E3A8A] text-sm font-semibold hover:bg-white/90 transition flex items-center gap-2">
+              <button
+                onClick={() => navigate('/lost-found')}
+                className="bg-[#FFFFFF] px-5 py-2 rounded-full text-[#1E3A8A] text-sm font-semibold hover:bg-white/90 transition flex items-center gap-2"
+              >
                 <Search className="w-4 h-4" />
                 View Lost Items
-              </a>
+              </button>
             </div>
           </div>
         </div>
