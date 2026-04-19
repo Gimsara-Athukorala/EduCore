@@ -120,6 +120,10 @@ function ClaimItemPage() {
     if (!claimFormData.agreedToTerms) {
       newErrors.agreedToTerms = "You must agree to the terms and conditions";
     }
+
+    if (!claimFormData.additionalNotes.trim()) {
+      newErrors.additionalNotes = "Additional notes are required";
+    }
     
     setClaimErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -483,15 +487,22 @@ function ClaimItemPage() {
 
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-[#2C3E50]">
-                      <ClipboardList className="w-4 h-4 inline mr-1" /> Additional Notes / Item Description
+                      <ClipboardList className="w-4 h-4 inline mr-1" /> Additional Notes*
                     </label>
                     <textarea 
                       rows="4" 
                       value={claimFormData.additionalNotes}
-                      onChange={(e) => setClaimFormData({...claimFormData, additionalNotes: e.target.value})}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setClaimFormData({ ...claimFormData, additionalNotes: value });
+                        if (claimErrors.additionalNotes && value.trim()) {
+                          setClaimErrors({ ...claimErrors, additionalNotes: undefined });
+                        }
+                      }}
                       className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5A623]" 
                       placeholder="Provide any additional details that can help verify ownership (color, brand, distinctive marks, serial number, where you lost it, etc.)"
                     />
+                    {claimErrors.additionalNotes && <p className="text-red-500 text-xs mt-1">{claimErrors.additionalNotes}</p>}
                     <p className="text-gray-400 text-xs mt-1">This information will help us verify that you are the rightful owner</p>
                   </div>
 
